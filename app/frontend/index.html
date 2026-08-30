@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Search Engine</title>
+
+    <link rel="stylesheet"
+          href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- =========================
+             HEADER
+        ========================== -->
+
+        <header class="header">
+
+            <h1>
+                🔎 My Search Engine
+            </h1>
+
+            <p class="subtitle">
+                Search the web and your personal index
+            </p>
+
+        </header>
+
+
+        <!-- =========================
+             SEARCH AREA
+        ========================== -->
+
+        <section class="search-section">
+
+            <div class="search-row">
+
+                <div class="search-box-wrapper">
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search the web..."
+                        autocomplete="off"
+                    >
+
+                    <div
+                        id="suggestions"
+                        class="suggestions hidden">
+                    </div>
+
+                </div>
+
+                <button
+                    id="searchButton"
+                    class="search-button">
+
+                    Search
+
+                </button>
+
+            </div>
+
+
+            <!-- =========================
+                 FILTERS
+            ========================== -->
+
+            <div class="filters">
+
+                <button
+                    class="filter-button active"
+                    data-category="all">
+
+                    All
+
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-category="general">
+
+                    Web
+
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-category="news">
+
+                    News
+
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-category="images">
+
+                    Images
+
+                </button>
+
+                <button
+                    class="filter-button"
+                    data-category="local">
+
+                    My Index
+
+                </button>
+
+
+                <select id="timeFilter">
+
+                    <option value="">
+                        Any time
+                    </option>
+
+                    <option value="hour">
+                        Past hour
+                    </option>
+
+                    <option value="day">
+                        Past 24 hours
+                    </option>
+
+                    <option value="week">
+                        Past week
+                    </option>
+
+                    <option value="month">
+                        Past month
+                    </option>
+
+                    <option value="year">
+                        Past year
+                    </option>
+
+                </select>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             ADD WEBSITE
+        ========================== -->
+
+        <section class="index-section">
+
+            <h2>
+                Add Website to My Index
+            </h2>
+
+            <div class="index-row">
+
+                <input
+                    type="url"
+                    id="urlInput"
+                    placeholder="Enter website URL, e.g. https://example.com"
+                >
+
+                <button
+                    id="indexButton">
+
+                    Add URL
+
+                </button>
+
+            </div>
+
+            <div
+                id="indexStatus"
+                class="status-message">
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             RESULTS HEADER
+        ========================== -->
+
+        <div
+            id="resultsHeader"
+            class="results-header">
+        </div>
+
+
+        <!-- =========================
+             RESULTS
+        ========================== -->
+
+        <main id="results">
+
+            <div class="welcome-message">
+
+                <h2>
+                    Welcome to My Search Engine
+                </h2>
+
+                <p>
+                    Enter a search query to get started.
+                </p>
+
+            </div>
+
+        </main>
+
+
+        <!-- =========================
+             PAGINATION
+        ========================== -->
+
+        <div
+            id="pagination"
+            class="pagination">
+        </div>
+
+
+        <!-- =========================
+             RECENT SEARCHES
+        ========================== -->
+
+        <section class="history-section">
+
+            <h2>
+                Recent Searches
+            </h2>
+
+            <div id="history">
+
+                <p class="muted">
+                    No recent searches.
+                </p>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
