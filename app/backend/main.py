@@ -10,8 +10,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from crawler import crawl_page
-from database import (
+from .crawler import crawl_page
+from .database import (
     initialize_database,
     search_documents,
     count_documents
@@ -48,7 +48,7 @@ INDEX_FILE = FRONTEND_DIR / "index.html"
 
 SEARCH_SERVER_URL = os.getenv(
     "SEARCH_SERVER_URL",
-    "http://localhost:8080/search"
+    "https://search-engine-1a2i.onrender.com/search"
 )
 
 
