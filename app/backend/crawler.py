@@ -11,7 +11,7 @@ from urllib.parse import (
 
 from urllib.robotparser import RobotFileParser
 
-from database import add_document
+from .database import add_document
 
 
 # ==================================================
