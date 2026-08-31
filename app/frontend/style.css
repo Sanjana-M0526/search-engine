@@ -11,15 +11,12 @@
     box-sizing: border-box;
 }
 
-
 html {
     scroll-behavior: smooth;
 }
 
-
 body {
     margin: 0;
-
     padding: 0;
 
     font-family:
@@ -27,11 +24,8 @@ body {
         Helvetica,
         sans-serif;
 
-    background:
-        #f5f7fb;
-
-    color:
-        #172033;
+    background: #f5f7fb;
+    color: #172033;
 
     min-height: 100vh;
 }
@@ -43,7 +37,6 @@ body {
 
 .container {
     width: 100%;
-
     max-width: 1200px;
 
     margin: 0 auto;
@@ -57,18 +50,15 @@ body {
    HEADER
    ====================================================== */
 
-header {
+.header {
     text-align: center;
-
     margin-bottom: 38px;
 }
 
-
-header h1 {
+.header h1 {
     margin: 0;
 
     font-size: 52px;
-
     font-weight: 700;
 
     letter-spacing: -1.5px;
@@ -76,10 +66,8 @@ header h1 {
     color: #172033;
 }
 
-
-header p {
+.header p {
     margin-top: 12px;
-
     margin-bottom: 0;
 
     font-size: 20px;
@@ -89,10 +77,20 @@ header p {
 
 
 /* ======================================================
-   SEARCH AREA
+   SEARCH SECTION
    ====================================================== */
 
-.search-container {
+.search-section {
+    width: 100%;
+    margin-bottom: 34px;
+}
+
+
+/* ======================================================
+   SEARCH ROW
+   ====================================================== */
+
+.search-row {
     display: flex;
 
     gap: 14px;
@@ -103,11 +101,20 @@ header p {
 }
 
 
-.search-container input,
-#searchInput {
+/* ======================================================
+   SEARCH BOX
+   ====================================================== */
+
+.search-box-wrapper {
+    position: relative;
+
     flex: 1;
 
     min-width: 0;
+}
+
+#searchInput {
+    width: 100%;
 
     height: 72px;
 
@@ -130,11 +137,8 @@ header p {
         box-shadow 0.2s;
 }
 
-
-.search-container input:focus,
 #searchInput:focus {
-    border-color:
-        #4285f4;
+    border-color: #4285f4;
 
     box-shadow:
         0 0 0 3px
@@ -143,17 +147,9 @@ header p {
 
 
 /* ======================================================
-   BUTTONS
+   SEARCH BUTTON
    ====================================================== */
 
-button {
-    font-family: inherit;
-
-    cursor: pointer;
-}
-
-
-.search-container button,
 #searchButton {
     height: 72px;
 
@@ -163,10 +159,9 @@ button {
 
     border-radius: 14px;
 
-    background:
-        #4285f4;
+    background: #4285f4;
 
-    color: white;
+    color: #ffffff;
 
     font-size: 20px;
 
@@ -180,24 +175,21 @@ button {
         transform 0.1s;
 }
 
-
-.search-container button:hover,
 #searchButton:hover {
-    background:
-        #3478e8;
+    background: #3478e8;
 }
 
-
-.search-container button:active,
 #searchButton:active {
-    transform:
-        scale(0.98);
+    transform: scale(0.98);
 }
 
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
 
 button:disabled {
     opacity: 0.6;
-
     cursor: not-allowed;
 }
 
@@ -206,7 +198,7 @@ button:disabled {
    FILTER BAR
    ====================================================== */
 
-.filter-container {
+.filters {
     display: flex;
 
     align-items: center;
@@ -215,11 +207,14 @@ button:disabled {
 
     flex-wrap: wrap;
 
-    margin-bottom: 34px;
+    margin-bottom: 0;
 }
 
 
-.filter-container button,
+/* ======================================================
+   FILTER BUTTONS
+   ====================================================== */
+
 .filter-button {
     height: 48px;
 
@@ -231,11 +226,9 @@ button:disabled {
 
     border-radius: 10px;
 
-    background:
-        #ffffff;
+    background: #ffffff;
 
-    color:
-        #111827;
+    color: #111827;
 
     font-size: 17px;
 
@@ -245,31 +238,24 @@ button:disabled {
         border-color 0.2s;
 }
 
-
-.filter-container button:hover,
 .filter-button:hover {
-    border-color:
-        #4285f4;
+    border-color: #4285f4;
 
-    color:
-        #4285f4;
+    color: #4285f4;
 }
 
 
-/* Active filter */
+/* ======================================================
+   ACTIVE FILTER
+   ====================================================== */
 
-.filter-container button.active-filter,
-.filter-container button.active,
-.filter-button.active-filter,
-.filter-button.active {
-    background:
-        #4285f4;
+.filter-button.active,
+.filter-button.active-filter {
+    background: #4285f4;
 
-    color:
-        #ffffff;
+    color: #ffffff;
 
-    border-color:
-        #4285f4;
+    border-color: #4285f4;
 }
 
 
@@ -290,23 +276,19 @@ button:disabled {
 
     border-radius: 10px;
 
-    background:
-        #ffffff;
+    background: #ffffff;
 
     font-size: 17px;
 
-    color:
-        #111827;
+    color: #111827;
 
     outline: none;
 
     cursor: pointer;
 }
 
-
 #timeFilter:focus {
-    border-color:
-        #4285f4;
+    border-color: #4285f4;
 
     box-shadow:
         0 0 0 3px
@@ -318,49 +300,49 @@ button:disabled {
    ADD WEBSITE SECTION
    ====================================================== */
 
-.add-index,
-.index-section,
-#addIndexSection {
+.index-section {
     width: 100%;
 
-    background:
-        #ffffff;
+    background: #ffffff;
 
     border:
         1px solid #dce2ec;
 
     border-radius: 16px;
 
-    padding:
-        28px;
+    padding: 28px;
 
     margin-bottom: 32px;
 }
 
-
-.add-index h2,
-.index-section h2,
-#addIndexSection h2 {
+.index-section h2 {
     margin-top: 0;
 
     margin-bottom: 22px;
 
     font-size: 28px;
 
-    color:
-        #172033;
+    color: #172033;
 }
 
 
-.add-url-container {
+/* ======================================================
+   ADD WEBSITE ROW
+   ====================================================== */
+
+.index-row {
     display: flex;
 
     gap: 14px;
+
+    width: 100%;
 }
 
 
-.add-url-container input,
-#websiteInput,
+/* ======================================================
+   URL INPUT
+   ====================================================== */
+
 #urlInput {
     flex: 1;
 
@@ -376,20 +358,15 @@ button:disabled {
 
     border-radius: 12px;
 
-    background:
-        #ffffff;
+    background: #ffffff;
 
     font-size: 18px;
 
     outline: none;
 }
 
-
-.add-url-container input:focus,
-#websiteInput:focus,
 #urlInput:focus {
-    border-color:
-        #4285f4;
+    border-color: #4285f4;
 
     box-shadow:
         0 0 0 3px
@@ -397,9 +374,11 @@ button:disabled {
 }
 
 
-.add-url-container button,
-#addUrlButton,
-#addURLButton {
+/* ======================================================
+   ADD URL BUTTON
+   ====================================================== */
+
+#addUrlButton {
     min-width: 140px;
 
     height: 62px;
@@ -408,24 +387,85 @@ button:disabled {
 
     border-radius: 12px;
 
-    background:
-        #4285f4;
+    background: #4285f4;
 
-    color:
-        #ffffff;
+    color: #ffffff;
 
     font-size: 18px;
 
     padding:
         0 24px;
+
+    transition:
+        background 0.2s,
+        transform 0.1s;
+}
+
+#addUrlButton:hover {
+    background: #3478e8;
+}
+
+#addUrlButton:active {
+    transform: scale(0.98);
 }
 
 
-.add-url-container button:hover,
-#addUrlButton:hover,
-#addURLButton:hover {
-    background:
-        #3478e8;
+/* ======================================================
+   INDEX STATUS
+   ====================================================== */
+
+#indexStatus {
+    margin-top: 12px;
+
+    font-size: 15px;
+}
+
+
+/* ======================================================
+   TEMPORARY MESSAGE
+   ====================================================== */
+
+.temporary-message {
+    position: fixed;
+
+    right: 25px;
+    bottom: 25px;
+
+    z-index: 9999;
+
+    padding:
+        14px 20px;
+
+    border-radius: 10px;
+
+    background: #172033;
+
+    color: #ffffff;
+
+    font-size: 15px;
+
+    box-shadow:
+        0 5px 20px
+        rgba(0, 0, 0, 0.15);
+
+    transition:
+        opacity 0.3s,
+        transform 0.3s;
+}
+
+.temporary-message.success {
+    background: #2e7d32;
+}
+
+.temporary-message.error {
+    background: #c62828;
+}
+
+.temporary-message.hide {
+    opacity: 0;
+
+    transform:
+        translateY(10px);
 }
 
 
@@ -433,21 +473,16 @@ button:disabled {
    RESULTS HEADER
    ====================================================== */
 
-#resultsHeader,
-.results-header {
+#resultsHeader {
     font-size: 19px;
 
-    color:
-        #465a78;
+    color: #465a78;
 
     margin-bottom: 18px;
 }
 
-
-#resultsHeader strong,
-.results-header strong {
-    color:
-        #172033;
+#resultsHeader strong {
+    color: #172033;
 }
 
 
@@ -456,16 +491,14 @@ button:disabled {
    ====================================================== */
 
 .result-card {
-    background:
-        #ffffff;
+    background: #ffffff;
 
     border:
         1px solid #dce2ec;
 
     border-radius: 14px;
 
-    padding:
-        24px;
+    padding: 24px;
 
     margin-bottom: 16px;
 
@@ -473,7 +506,6 @@ button:disabled {
         box-shadow 0.2s,
         transform 0.2s;
 }
-
 
 .result-card:hover {
     box-shadow:
@@ -485,31 +517,40 @@ button:disabled {
 }
 
 
+/* ======================================================
+   RESULT NUMBER
+   ====================================================== */
+
 .result-number {
     font-size: 15px;
 
-    color:
-        #64748b;
+    color: #64748b;
 
     margin-bottom: 5px;
 }
 
 
+/* ======================================================
+   RESULT DOMAIN
+   ====================================================== */
+
 .result-domain {
     font-size: 15px;
 
-    color:
-        #64748b;
+    color: #64748b;
 
     margin-bottom: 6px;
 }
 
 
+/* ======================================================
+   RESULT TITLE
+   ====================================================== */
+
 .result-title {
     display: block;
 
-    color:
-        #0000b8;
+    color: #0000b8;
 
     font-size: 25px;
 
@@ -520,24 +561,29 @@ button:disabled {
     margin-bottom: 12px;
 }
 
-
 .result-title:hover {
-    text-decoration:
-        underline;
+    text-decoration: underline;
 }
 
+
+/* ======================================================
+   RESULT CONTENT
+   ====================================================== */
 
 .result-content {
     font-size: 17px;
 
     line-height: 1.6;
 
-    color:
-        #26364f;
+    color: #26364f;
 
     margin-bottom: 14px;
 }
 
+
+/* ======================================================
+   RESULT META
+   ====================================================== */
 
 .result-meta {
     display: flex;
@@ -550,16 +596,13 @@ button:disabled {
 
     font-size: 14px;
 
-    color:
-        #60708b;
+    color: #60708b;
 }
-
 
 .result-meta .score {
     font-weight: 600;
 
-    color:
-        #26364f;
+    color: #26364f;
 }
 
 
@@ -579,11 +622,14 @@ button:disabled {
 }
 
 
+/* ======================================================
+   IMAGE RESULT CARD
+   ====================================================== */
+
 .image-result-card {
     overflow: hidden;
 
-    background:
-        #ffffff;
+    background: #ffffff;
 
     border:
         1px solid #dce2ec;
@@ -595,7 +641,6 @@ button:disabled {
         box-shadow 0.2s;
 }
 
-
 .image-result-card:hover {
     transform:
         translateY(-3px);
@@ -606,6 +651,10 @@ button:disabled {
 }
 
 
+/* ======================================================
+   IMAGE LINK
+   ====================================================== */
+
 .image-link {
     display: block;
 
@@ -613,14 +662,17 @@ button:disabled {
 
     height: 220px;
 
-    background:
-        #eef1f6;
+    background: #eef1f6;
 
     overflow: hidden;
 
     text-decoration: none;
 }
 
+
+/* ======================================================
+   RESULT IMAGE
+   ====================================================== */
 
 .result-image {
     width: 100%;
@@ -635,13 +687,16 @@ button:disabled {
         transform 0.25s;
 }
 
-
 .image-result-card:hover
 .result-image {
     transform:
         scale(1.04);
 }
 
+
+/* ======================================================
+   IMAGE PLACEHOLDER
+   ====================================================== */
 
 .image-placeholder {
     width: 100%;
@@ -656,13 +711,15 @@ button:disabled {
 
     font-size: 45px;
 
-    background:
-        #eef1f6;
+    background: #eef1f6;
 
-    color:
-        #8a96a8;
+    color: #8a96a8;
 }
 
+
+/* ======================================================
+   IMAGE RESULT INFO
+   ====================================================== */
 
 .image-result-info {
     padding:
@@ -670,23 +727,29 @@ button:disabled {
 }
 
 
+/* ======================================================
+   IMAGE RESULT NUMBER
+   ====================================================== */
+
 .image-result-number {
     font-size: 13px;
 
-    color:
-        #718096;
+    color: #718096;
 
     margin-bottom: 5px;
 }
 
+
+/* ======================================================
+   IMAGE RESULT TITLE
+   ====================================================== */
 
 .image-result-title {
     font-size: 16px;
 
     font-weight: 600;
 
-    color:
-        #172033;
+    color: #172033;
 
     line-height: 1.35;
 
@@ -704,11 +767,14 @@ button:disabled {
 }
 
 
+/* ======================================================
+   IMAGE RESULT DOMAIN
+   ====================================================== */
+
 .image-result-domain {
     font-size: 13px;
 
-    color:
-        #718096;
+    color: #718096;
 
     overflow: hidden;
 
@@ -733,8 +799,7 @@ button:disabled {
 
     justify-content: center;
 
-    background:
-        #ffffff;
+    background: #ffffff;
 
     border:
         1px solid #dce2ec;
@@ -742,16 +807,13 @@ button:disabled {
     border-radius: 14px;
 }
 
-
 .loading {
     margin-top: 15px;
 
     font-size: 18px;
 
-    color:
-        #53657e;
+    color: #53657e;
 }
-
 
 .loading-spinner {
     width: 42px;
@@ -769,7 +831,6 @@ button:disabled {
     animation:
         spin 0.8s linear infinite;
 }
-
 
 @keyframes spin {
 
@@ -803,8 +864,7 @@ button:disabled {
 
     text-align: center;
 
-    background:
-        #ffffff;
+    background: #ffffff;
 
     border:
         1px solid #dce2ec;
@@ -814,13 +874,11 @@ button:disabled {
     padding: 40px;
 }
 
-
 .empty-icon {
     font-size: 44px;
 
     margin-bottom: 12px;
 }
-
 
 .empty-message h2 {
     margin:
@@ -828,18 +886,60 @@ button:disabled {
 
     font-size: 27px;
 
-    color:
-        #172033;
+    color: #172033;
 }
-
 
 .empty-message p {
     margin: 0;
 
     font-size: 17px;
 
-    color:
-        #60708b;
+    color: #60708b;
+}
+
+
+/* ======================================================
+   WELCOME MESSAGE
+   ====================================================== */
+
+.welcome-message {
+    min-height: 260px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border:
+        1px solid #dce2ec;
+
+    border-radius: 14px;
+
+    padding: 40px;
+}
+
+.welcome-message h2 {
+    margin:
+        0 0 10px;
+
+    font-size: 27px;
+
+    color: #172033;
+}
+
+.welcome-message p {
+    margin: 0;
+
+    font-size: 17px;
+
+    color: #60708b;
 }
 
 
@@ -860,8 +960,7 @@ button:disabled {
 
     text-align: center;
 
-    background:
-        #ffffff;
+    background: #ffffff;
 
     border:
         1px solid #e1d7d7;
@@ -871,13 +970,11 @@ button:disabled {
     padding: 35px;
 }
 
-
 .error-icon {
     font-size: 38px;
 
     margin-bottom: 10px;
 }
-
 
 .error-message h3 {
     margin:
@@ -885,21 +982,17 @@ button:disabled {
 
     font-size: 24px;
 
-    color:
-        #a33;
+    color: #a33;
 }
-
 
 .error-message p {
     margin:
         5px 0;
 
-    color:
-        #5d6878;
+    color: #5d6878;
 
     font-size: 16px;
 }
-
 
 .small-text {
     font-size: 14px !important;
@@ -916,7 +1009,6 @@ button:disabled {
     margin-bottom: 30px;
 }
 
-
 .pagination {
     display: flex;
 
@@ -926,7 +1018,6 @@ button:disabled {
 
     gap: 18px;
 }
-
 
 .pagination-button {
     min-width: 130px;
@@ -938,50 +1029,65 @@ button:disabled {
 
     border-radius: 9px;
 
-    background:
-        #ffffff;
+    background: #ffffff;
 
-    color:
-        #172033;
+    color: #172033;
 
     font-size: 15px;
 
     transition:
         background 0.2s,
-        color 0.2s;
+        color 0.2s,
+        border-color 0.2s;
 }
-
 
 .pagination-button:hover:not(:disabled) {
-    background:
-        #4285f4;
+    background: #4285f4;
 
-    color:
-        #ffffff;
+    color: #ffffff;
 
-    border-color:
-        #4285f4;
+    border-color: #4285f4;
 }
-
 
 .pagination-button:disabled {
     opacity: 0.45;
 }
-
 
 .page-number {
     font-size: 16px;
 
     font-weight: 600;
 
-    color:
-        #34445c;
+    color: #34445c;
 }
 
 
 /* ======================================================
    SEARCH HISTORY
    ====================================================== */
+
+.history-section {
+    margin-top: 35px;
+
+    background: #ffffff;
+
+    border:
+        1px solid #dce2ec;
+
+    border-radius: 14px;
+
+    padding: 24px;
+}
+
+.history-section h2 {
+    margin-top: 0;
+
+    margin-bottom: 15px;
+
+    font-size: 24px;
+
+    color: #172033;
+}
 
 .history-item {
     display: block;
@@ -990,312 +1096,169 @@ button:disabled {
 
     border: none;
 
-    background:
-        transparent;
+    background: transparent;
 
     padding:
         9px 10px;
 
     text-align: left;
 
-    color:
-        #334155;
+    color: #334155;
 
     border-radius: 7px;
 }
 
-
 .history-item:hover {
-    background:
-        #eef4ff;
+    background: #eef4ff;
 }
 
-
 .muted {
-    color:
-        #78869a;
+    color: #78869a;
 }
 
 
 /* ======================================================
-   TEMPORARY MESSAGE
+   SUGGESTIONS
    ====================================================== */
 
-.temporary-message {
-    position: fixed;
+.suggestions {
+    position: absolute;
 
-    right: 25px;
+    top: calc(100% + 5px);
 
-    bottom: 25px;
+    left: 0;
 
-    z-index: 9999;
+    right: 0;
 
-    max-width: 400px;
+    z-index: 1000;
 
-    padding:
-        15px 20px;
+    background: #ffffff;
+
+    border:
+        1px solid #dce2ec;
 
     border-radius: 10px;
 
-    background:
-        #172033;
-
-    color:
-        #ffffff;
-
-    font-size: 15px;
-
     box-shadow:
-        0 8px 25px
-        rgba(0, 0, 0, 0.15);
+        0 5px 20px
+        rgba(30, 50, 80, 0.10);
 
-    animation:
-        messageIn 0.25s ease;
+    overflow: hidden;
 }
 
-
-.temporary-message.success {
-    background:
-        #198754;
-}
-
-
-.temporary-message.error {
-    background:
-        #c0392b;
-}
-
-
-.temporary-message.hide {
-    opacity: 0;
-
-    transform:
-        translateY(10px);
-
-    transition:
-        opacity 0.3s,
-        transform 0.3s;
-}
-
-
-@keyframes messageIn {
-
-    from {
-        opacity: 0;
-
-        transform:
-            translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-
-        transform:
-            translateY(0);
-    }
-
+.suggestions.hidden {
+    display: none;
 }
 
 
 /* ======================================================
-   RESPONSIVE - TABLET
+   RESPONSIVE DESIGN
    ====================================================== */
 
-@media (
-    max-width: 900px
-) {
+@media (max-width: 900px) {
+
+    .container {
+        padding:
+            35px 18px 50px;
+    }
+
+    .header h1 {
+        font-size: 42px;
+    }
+
+    .header p {
+        font-size: 18px;
+    }
 
     .image-results-grid {
         grid-template-columns:
             repeat(3, 1fr);
     }
 
+}
 
-    header h1 {
-        font-size: 43px;
+
+@media (max-width: 700px) {
+
+    .search-row {
+        flex-direction: column;
+    }
+
+    #searchButton {
+        width: 100%;
+    }
+
+    .index-row {
+        flex-direction: column;
+    }
+
+    #addUrlButton {
+        width: 100%;
+    }
+
+    .image-results-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
 }
 
 
-/* ======================================================
-   RESPONSIVE - MOBILE
-   ====================================================== */
-
-@media (
-    max-width: 700px
-) {
+@media (max-width: 500px) {
 
     .container {
         padding:
-            30px 16px 50px;
+            25px 14px 40px;
     }
 
-
-    header {
-        margin-bottom: 28px;
+    .header h1 {
+        font-size: 34px;
     }
 
-
-    header h1 {
-        font-size: 35px;
-
-        letter-spacing: -1px;
+    .header p {
+        font-size: 16px;
     }
 
-
-    header p {
-        font-size: 17px;
-    }
-
-
-    .search-container {
-        flex-direction: column;
-
-        gap: 10px;
-    }
-
-
-    .search-container input,
     #searchInput {
-        width: 100%;
-
         height: 60px;
 
         font-size: 18px;
     }
 
-
-    .search-container button,
     #searchButton {
-        width: 100%;
-
-        height: 58px;
+        height: 60px;
     }
 
-
-    .filter-container {
-        gap: 8px;
-    }
-
-
-    .filter-container button,
     .filter-button {
         padding:
-            0 17px;
+            0 16px;
 
         font-size: 15px;
-
-        height: 44px;
     }
-
 
     #timeFilter {
         width: 100%;
-
-        height: 44px;
     }
 
-
-    .add-index,
-    .index-section,
-    #addIndexSection {
-        padding:
-            20px;
+    .index-section {
+        padding: 20px;
     }
 
-
-    .add-url-container {
-        flex-direction: column;
+    .index-section h2 {
+        font-size: 23px;
     }
-
-
-    .add-url-container input,
-    #websiteInput,
-    #urlInput {
-        width: 100%;
-
-        height: 55px;
-    }
-
-
-    .add-url-container button,
-    #addUrlButton,
-    #addURLButton {
-        width: 100%;
-
-        height: 55px;
-    }
-
-
-    .image-results-grid {
-        grid-template-columns:
-            repeat(2, 1fr);
-
-        gap: 12px;
-    }
-
-
-    .image-link {
-        height: 170px;
-    }
-
-
-    .result-card {
-        padding: 18px;
-    }
-
-
-    .result-title {
-        font-size: 21px;
-    }
-
-
-    .result-content {
-        font-size: 16px;
-    }
-
-
-    .pagination {
-        gap: 8px;
-    }
-
-
-    .pagination-button {
-        min-width: 105px;
-    }
-
-}
-
-
-/* ======================================================
-   RESPONSIVE - SMALL MOBILE
-   ====================================================== */
-
-@media (
-    max-width: 430px
-) {
-
-    header h1 {
-        font-size: 30px;
-    }
-
 
     .image-results-grid {
         grid-template-columns:
             1fr;
     }
 
-
-    .image-link {
-        height: 220px;
+    .result-title {
+        font-size: 21px;
     }
 
-
-    .pagination-button {
-        min-width: 95px;
-
-        font-size: 14px;
+    .result-content {
+        font-size: 16px;
     }
 
 }

@@ -9,7 +9,7 @@
 
     <title>My Search Engine</title>
 
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
@@ -167,7 +167,7 @@
                 >
 
                 <button
-                    id="indexButton">
+                    id="addUrlButton">
 
                     Add URL
 
@@ -197,7 +197,7 @@
              RESULTS
         ========================== -->
 
-        <main id="results">
+        <main id="resultsContainer">
 
             <div class="welcome-message">
 
@@ -218,10 +218,7 @@
              PAGINATION
         ========================== -->
 
-        <div
-            id="pagination"
-            class="pagination">
-        </div>
+        <div id="paginationContainer"></div>
 
 
         <!-- =========================
@@ -234,7 +231,7 @@
                 Recent Searches
             </h2>
 
-            <div id="history">
+            <div id="historyContainer">
 
                 <p class="muted">
                     No recent searches.
@@ -251,7 +248,7 @@
          JAVASCRIPT
     ========================== -->
 
-    <script src="/script.js"></script>
+    <script src="/static/script.js"></script>
 
 </body>
 

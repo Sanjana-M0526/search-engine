@@ -86,20 +86,6 @@ SEARCH_SERVER_URL = os.getenv(
 if not SEARCH_SERVER_URL.endswith("/search"):
     SEARCH_SERVER_URL += "/search"
 
-
-# ============================================================
-# CORS
-# ============================================================
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
 # ============================================================
 # SEARCH HISTORY
 # ============================================================
