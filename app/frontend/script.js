@@ -2,15 +2,9 @@
 // MY SEARCH ENGINE - FRONTEND
 // ============================================================
 
-// IMPORTANT:
-// After deploying your FastAPI backend on Render,
-// replace this URL with your BACKEND Render URL.
-//
-// Example:
-// https://search-engine-backend.onrender.com
-//
+// Your deployed FastAPI backend
 const API_URL = "https://search-engine-backend-0bba.onrender.com";
-        : "";
+
 // ============================================================
 // ELEMENTS
 // ============================================================
@@ -29,7 +23,6 @@ const indexStatus = document.getElementById("indexStatus");
 const suggestionsBox = document.getElementById("suggestions");
 const historyContainer = document.getElementById("history");
 
-
 // ============================================================
 // STATE
 // ============================================================
@@ -38,7 +31,6 @@ let currentCategory = "all";
 let currentPage = 1;
 let currentQuery = "";
 let currentTime = "";
-
 
 // ============================================================
 // SEARCH
@@ -62,7 +54,12 @@ async function performSearch(page = 1) {
 
     currentQuery = query;
     currentPage = page;
-    currentTime = timeFilter.value;
+
+    if (timeFilter) {
+        currentTime = timeFilter.value;
+    } else {
+        currentTime = "";
+    }
 
     resultsContainer.innerHTML = `
         <div class="loading">
@@ -79,9 +76,9 @@ async function performSearch(page = 1) {
 
         let url;
 
-        // -------------------------------
+        // ====================================================
         // MY INDEX
-        // -------------------------------
+        // ====================================================
 
         if (currentCategory === "local") {
 
@@ -91,9 +88,9 @@ async function performSearch(page = 1) {
 
         }
 
-        // -------------------------------
-        // WEB / NEWS / IMAGES
-        // -------------------------------
+        // ====================================================
+        // WEB / NEWS / IMAGES / ALL
+        // ====================================================
 
         else {
 
@@ -101,35 +98,29 @@ async function performSearch(page = 1) {
                 `${API_URL}/search` +
                 `?q=${encodeURIComponent(query)}` +
                 `&page=${page}` +
-                `&category=${encodeURIComponent(currentCategory)}` +
-                `&time=${encodeURIComponent(currentTime)}`;
-        }
+                `&category=${encodeURIComponent(currentCategory)}`;
 
+            if (currentTime) {
+                url +=
+                    `&time=${encodeURIComponent(currentTime)}`;
+            }
+        }
 
         console.log("Searching:", url);
 
-
+        // IMPORTANT:
+        // Use the URL we created above.
         const response = await fetch(url);
 
-
         if (!response.ok) {
-
-            throw new Error(
-                `HTTP ${response.status}`
-            );
+            throw new Error(`HTTP ${response.status}`);
         }
-
 
         const data = await response.json();
 
-
         if (data.error) {
-
-            throw new Error(
-                data.error
-            );
+            throw new Error(data.error);
         }
-
 
         displayResults(data);
 
@@ -139,24 +130,15 @@ async function performSearch(page = 1) {
 
     catch (error) {
 
-        console.error(
-            "Search error:",
-            error
-        );
+        console.error("Search error:", error);
 
         resultsContainer.innerHTML = `
             <div class="error-message">
-
                 <h3>Search failed</h3>
-
-                <p>
-                    ${escapeHtml(error.message)}
-                </p>
-
+                <p>${escapeHtml(error.message)}</p>
                 <p>
                     Please check that the backend is running.
                 </p>
-
             </div>
         `;
     }
@@ -168,35 +150,26 @@ async function performSearch(page = 1) {
     }
 }
 
-
 // ============================================================
 // DISPLAY RESULTS
 // ============================================================
 
 function displayResults(data) {
 
-    const results =
-        data.results || [];
+    const results = data.results || [];
 
     const total =
         Number(data.total || results.length);
 
-
     resultsHeader.innerHTML =
         `Found <strong>${total}</strong> results`;
-
 
     if (results.length === 0) {
 
         resultsContainer.innerHTML = `
             <div class="empty-message">
-
                 <h3>No results found</h3>
-
-                <p>
-                    Try another search query.
-                </p>
-
+                <p>Try another search query.</p>
             </div>
         `;
 
@@ -205,8 +178,9 @@ function displayResults(data) {
         return;
     }
 
-
+    // ========================================================
     // IMAGE SEARCH
+    // ========================================================
 
     if (currentCategory === "images") {
 
@@ -215,46 +189,34 @@ function displayResults(data) {
         return;
     }
 
-
+    // ========================================================
     // NORMAL SEARCH RESULTS
+    // ========================================================
 
     resultsContainer.innerHTML =
         results
             .map(
                 (result, index) =>
-                    createResultCard(
-                        result,
-                        index
-                    )
+                    createResultCard(result, index)
             )
             .join("");
 
-
     createPagination(data);
 }
-
 
 // ============================================================
 // RESULT CARD
 // ============================================================
 
-function createResultCard(
-    result,
-    index
-) {
+function createResultCard(result, index) {
 
     const url =
-        escapeHtml(
-            result.url || "#"
-        );
-
+        escapeHtml(result.url || "#");
 
     const title =
         highlightText(
-            result.title ||
-            "Untitled"
+            result.title || "Untitled"
         );
-
 
     const content =
         highlightText(
@@ -262,20 +224,16 @@ function createResultCard(
             "No description available."
         );
 
-
     const domain =
         escapeHtml(
             result.domain ||
             getDomain(result.url)
         );
 
-
     const engine =
         escapeHtml(
-            result.engine ||
-            "search"
+            result.engine || "search"
         );
-
 
     const category =
         escapeHtml(
@@ -283,15 +241,10 @@ function createResultCard(
             currentCategory
         );
 
-
     const score =
-        Number(
-            result.score || 0
-        ).toFixed(1);
-
+        Number(result.score || 0).toFixed(1);
 
     return `
-
         <article class="result-card">
 
             <div class="result-number">
@@ -332,10 +285,8 @@ function createResultCard(
             </div>
 
         </article>
-
     `;
 }
-
 
 // ============================================================
 // IMAGE RESULTS
@@ -350,18 +301,12 @@ function displayImageResults(results) {
                 result.img_src
         );
 
-
     if (images.length === 0) {
 
         resultsContainer.innerHTML = `
             <div class="empty-message">
-
                 <h3>No images found</h3>
-
-                <p>
-                    Try another image search.
-                </p>
-
+                <p>Try another image search.</p>
             </div>
         `;
 
@@ -369,7 +314,6 @@ function displayImageResults(results) {
 
         return;
     }
-
 
     resultsContainer.innerHTML = `
 
@@ -382,10 +326,11 @@ function displayImageResults(results) {
                     result.img_src;
 
                 return `
-
                     <a
                         class="image-card"
-                        href="${escapeHtml(result.url || "#")}"
+                        href="${escapeHtml(
+                            result.url || "#"
+                        )}"
                         target="_blank"
                         rel="noopener noreferrer"
                     >
@@ -393,8 +338,7 @@ function displayImageResults(results) {
                         <img
                             src="${escapeHtml(image)}"
                             alt="${escapeHtml(
-                                result.title ||
-                                "Image"
+                                result.title || "Image"
                             )}"
                             loading="lazy"
                             onerror="
@@ -403,28 +347,22 @@ function displayImageResults(results) {
                         >
 
                         <div class="image-card-title">
-
                             ${escapeHtml(
                                 result.title ||
                                 "Image result"
                             )}
-
                         </div>
 
                     </a>
-
                 `;
 
             }).join("")}
 
         </div>
-
     `;
-
 
     pagination.innerHTML = "";
 }
-
 
 // ============================================================
 // PAGINATION
@@ -438,10 +376,7 @@ function createPagination(data) {
     const perPage = 20;
 
     const totalPages =
-        Math.ceil(
-            total / perPage
-        );
-
+        Math.ceil(total / perPage);
 
     if (totalPages <= 1) {
 
@@ -449,7 +384,6 @@ function createPagination(data) {
 
         return;
     }
-
 
     pagination.innerHTML = `
 
@@ -470,9 +404,7 @@ function createPagination(data) {
         >
             Next →
         </button>
-
     `;
-
 
     document
         .getElementById("previousPage")
@@ -494,17 +426,13 @@ function createPagination(data) {
             }
         );
 
-
     document
         .getElementById("nextPage")
         ?.addEventListener(
             "click",
             () => {
 
-                if (
-                    currentPage <
-                    totalPages
-                ) {
+                if (currentPage < totalPages) {
 
                     performSearch(
                         currentPage + 1
@@ -519,7 +447,6 @@ function createPagination(data) {
         );
 }
 
-
 // ============================================================
 // CATEGORY FILTERS
 // ============================================================
@@ -533,58 +460,40 @@ document
             () => {
 
                 document
-                    .querySelectorAll(
-                        ".filter-button"
-                    )
+                    .querySelectorAll(".filter-button")
                     .forEach(btn =>
-                        btn.classList.remove(
-                            "active"
-                        )
+                        btn.classList.remove("active")
                     );
 
-
-                button.classList.add(
-                    "active"
-                );
-
+                button.classList.add("active");
 
                 currentCategory =
                     button.dataset.category;
 
-
-                if (
-                    searchInput.value.trim()
-                ) {
-
+                if (searchInput.value.trim()) {
                     performSearch(1);
-
                 }
-
             }
         );
-
     });
-
 
 // ============================================================
 // TIME FILTER
 // ============================================================
 
-timeFilter.addEventListener(
-    "change",
-    () => {
+if (timeFilter) {
 
-        if (
-            searchInput.value.trim()
-        ) {
+    timeFilter.addEventListener(
+        "change",
+        () => {
 
-            performSearch(1);
+            if (searchInput.value.trim()) {
+                performSearch(1);
+            }
 
         }
-
-    }
-);
-
+    );
+}
 
 // ============================================================
 // SEARCH BUTTON
@@ -593,12 +502,9 @@ timeFilter.addEventListener(
 searchButton.addEventListener(
     "click",
     () => {
-
         performSearch(1);
-
     }
 );
-
 
 // ============================================================
 // ENTER KEY
@@ -608,17 +514,14 @@ searchInput.addEventListener(
     "keydown",
     event => {
 
-        if (
-            event.key === "Enter"
-        ) {
+        if (event.key === "Enter") {
+
+            event.preventDefault();
 
             performSearch(1);
-
         }
-
     }
 );
-
 
 // ============================================================
 // SUGGESTIONS
@@ -626,53 +529,42 @@ searchInput.addEventListener(
 
 let suggestionTimeout;
 
+if (searchInput && suggestionsBox) {
 
-searchInput.addEventListener(
-    "input",
-    () => {
+    searchInput.addEventListener(
+        "input",
+        () => {
 
-        clearTimeout(
-            suggestionTimeout
-        );
+            clearTimeout(suggestionTimeout);
 
+            const query =
+                searchInput.value.trim();
 
-        const query =
-            searchInput.value.trim();
+            if (!query) {
 
+                suggestionsBox.classList.add("hidden");
 
-        if (!query) {
+                return;
+            }
 
-            suggestionsBox.classList.add(
-                "hidden"
-            );
-
-            return;
+            suggestionTimeout =
+                setTimeout(
+                    () => {
+                        loadSuggestions(query);
+                    },
+                    300
+                );
         }
-
-
-        suggestionTimeout =
-            setTimeout(
-                () => {
-
-                    loadSuggestions(
-                        query
-                    );
-
-                },
-                300
-            );
-
-    }
-);
-
+    );
+}
 
 // ============================================================
 // LOAD SUGGESTIONS
 // ============================================================
 
-async function loadSuggestions(
-    query
-) {
+async function loadSuggestions(query) {
+
+    if (!suggestionsBox) return;
 
     try {
 
@@ -681,38 +573,27 @@ async function loadSuggestions(
                 `${API_URL}/suggestions?q=${encodeURIComponent(query)}`
             );
 
-
         if (!response.ok) {
-
             return;
         }
-
 
         const data =
             await response.json();
 
-
         const suggestions =
             data.suggestions || [];
 
+        if (suggestions.length === 0) {
 
-        if (
-            suggestions.length === 0
-        ) {
-
-            suggestionsBox.classList.add(
-                "hidden"
-            );
+            suggestionsBox.classList.add("hidden");
 
             return;
         }
-
 
         suggestionsBox.innerHTML =
             suggestions
                 .map(
                     suggestion => `
-
                         <div
                             class="suggestion-item"
                             data-value="${escapeHtml(
@@ -724,21 +605,14 @@ async function loadSuggestions(
                                 suggestion
                             )}
                         </div>
-
                     `
                 )
                 .join("");
 
-
-        suggestionsBox.classList.remove(
-            "hidden"
-        );
-
+        suggestionsBox.classList.remove("hidden");
 
         document
-            .querySelectorAll(
-                ".suggestion-item"
-            )
+            .querySelectorAll(".suggestion-item")
             .forEach(item => {
 
                 item.addEventListener(
@@ -753,10 +627,8 @@ async function loadSuggestions(
                         );
 
                         performSearch(1);
-
                     }
                 );
-
             });
 
     }
@@ -767,10 +639,8 @@ async function loadSuggestions(
             "Suggestion error:",
             error
         );
-
     }
 }
-
 
 // ============================================================
 // CLOSE SUGGESTIONS
@@ -781,6 +651,7 @@ document.addEventListener(
     event => {
 
         if (
+            suggestionsBox &&
             !event.target.closest(
                 ".search-box-wrapper"
             )
@@ -789,44 +660,44 @@ document.addEventListener(
             suggestionsBox.classList.add(
                 "hidden"
             );
-
         }
-
     }
 );
-
 
 // ============================================================
 // ADD WEBSITE TO MY INDEX
 // ============================================================
 
-indexButton.addEventListener(
-    "click",
-    indexWebsite
-);
+if (indexButton) {
 
+    indexButton.addEventListener(
+        "click",
+        indexWebsite
+    );
+}
 
-urlInput.addEventListener(
-    "keydown",
-    event => {
+if (urlInput) {
 
-        if (
-            event.key === "Enter"
-        ) {
+    urlInput.addEventListener(
+        "keydown",
+        event => {
 
-            indexWebsite();
+            if (event.key === "Enter") {
 
+                event.preventDefault();
+
+                indexWebsite();
+            }
         }
-
-    }
-);
-
+    );
+}
 
 async function indexWebsite() {
 
+    if (!urlInput) return;
+
     let url =
         urlInput.value.trim();
-
 
     if (!url) {
 
@@ -838,7 +709,6 @@ async function indexWebsite() {
         return;
     }
 
-
     if (
         !url.startsWith("http://") &&
         !url.startsWith("https://")
@@ -846,18 +716,14 @@ async function indexWebsite() {
 
         url =
             "https://" + url;
-
     }
 
-
     indexButton.disabled = true;
-
 
     showIndexStatus(
         "⏳ Indexing website...",
         true
     );
-
 
     try {
 
@@ -869,10 +735,8 @@ async function indexWebsite() {
                 }
             );
 
-
         const data =
             await response.json();
-
 
         if (
             response.ok &&
@@ -884,16 +748,11 @@ async function indexWebsite() {
                 true
             );
 
-
             urlInput.value = "";
-
 
             currentCategory = "local";
 
-
-            setActiveCategory(
-                "local"
-            );
+            setActiveCategory("local");
 
         }
 
@@ -908,7 +767,6 @@ async function indexWebsite() {
                 ),
                 false
             );
-
         }
 
     }
@@ -919,7 +777,6 @@ async function indexWebsite() {
             "Indexing error:",
             error
         );
-
 
         showIndexStatus(
             "❌ Could not connect to backend.",
@@ -935,19 +792,16 @@ async function indexWebsite() {
     }
 }
 
-
 // ============================================================
 // INDEX STATUS
 // ============================================================
 
-function showIndexStatus(
-    message,
-    success
-) {
+function showIndexStatus(message, success) {
+
+    if (!indexStatus) return;
 
     indexStatus.textContent =
         message;
-
 
     indexStatus.className =
         "status-message " +
@@ -958,12 +812,13 @@ function showIndexStatus(
         );
 }
 
-
 // ============================================================
 // SEARCH HISTORY
 // ============================================================
 
 async function loadHistory() {
+
+    if (!historyContainer) return;
 
     try {
 
@@ -972,25 +827,17 @@ async function loadHistory() {
                 `${API_URL}/history`
             );
 
-
         if (!response.ok) {
-
             return;
-
         }
-
 
         const data =
             await response.json();
 
-
         const history =
             data.history || [];
 
-
-        if (
-            history.length === 0
-        ) {
+        if (history.length === 0) {
 
             historyContainer.innerHTML = `
                 <p class="muted">
@@ -1001,12 +848,10 @@ async function loadHistory() {
             return;
         }
 
-
         historyContainer.innerHTML =
             history
                 .map(
                     item => `
-
                         <div
                             class="history-item"
                             data-query="${escapeHtml(
@@ -1018,16 +863,12 @@ async function loadHistory() {
                                 item.query
                             )}
                         </div>
-
                     `
                 )
                 .join("");
 
-
         document
-            .querySelectorAll(
-                ".history-item"
-            )
+            .querySelectorAll(".history-item")
             .forEach(item => {
 
                 item.addEventListener(
@@ -1040,15 +881,11 @@ async function loadHistory() {
                         currentCategory =
                             "all";
 
-                        setActiveCategory(
-                            "all"
-                        );
+                        setActiveCategory("all");
 
                         performSearch(1);
-
                     }
                 );
-
             });
 
     }
@@ -1059,34 +896,26 @@ async function loadHistory() {
             "History error:",
             error
         );
-
     }
 }
-
 
 // ============================================================
 // CATEGORY HELPER
 // ============================================================
 
-function setActiveCategory(
-    category
-) {
+function setActiveCategory(category) {
 
     document
-        .querySelectorAll(
-            ".filter-button"
-        )
+        .querySelectorAll(".filter-button")
         .forEach(button => {
 
             button.classList.toggle(
                 "active",
-                button.dataset.category ===
-                category
+                button.dataset.category === category
             );
 
         });
 }
-
 
 // ============================================================
 // HIGHLIGHT SEARCH WORDS
@@ -1095,17 +924,11 @@ function setActiveCategory(
 function highlightText(text) {
 
     const safeText =
-        escapeHtml(
-            String(text)
-        );
-
+        escapeHtml(String(text));
 
     if (!currentQuery) {
-
         return safeText;
-
     }
-
 
     const words =
         currentQuery
@@ -1113,10 +936,8 @@ function highlightText(text) {
             .split(/\s+/)
             .filter(Boolean);
 
-
     let result =
         safeText;
-
 
     words.forEach(word => {
 
@@ -1125,13 +946,9 @@ function highlightText(text) {
                 escapeHtml(word)
             );
 
-
         if (!escaped) {
-
             return;
-
         }
-
 
         const regex =
             new RegExp(
@@ -1139,19 +956,15 @@ function highlightText(text) {
                 "gi"
             );
 
-
         result =
             result.replace(
                 regex,
                 "<mark>$1</mark>"
             );
-
     });
-
 
     return result;
 }
-
 
 // ============================================================
 // SECURITY
@@ -1160,33 +973,12 @@ function highlightText(text) {
 function escapeHtml(value) {
 
     return String(value)
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
-
 
 function escapeRegex(value) {
 
@@ -1194,9 +986,7 @@ function escapeRegex(value) {
         /[.*+?^${}()|[\]\\]/g,
         "\\$&"
     );
-
 }
-
 
 // ============================================================
 // DOMAIN
@@ -1213,11 +1003,8 @@ function getDomain(url) {
     catch {
 
         return "";
-
     }
-
 }
-
 
 // ============================================================
 // START
