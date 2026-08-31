@@ -9,12 +9,8 @@
 // Example:
 // https://search-engine-backend.onrender.com
 //
-const API_URL =
-    window.location.hostname === "localhost"
-        ? "http://localhost:8000"
-        : "https://YOUR-BACKEND-NAME.onrender.com";
-
-
+const API_URL = "https://search-engine-backend-0bba.onrender.com";
+        : "";
 // ============================================================
 // ELEMENTS
 // ============================================================
