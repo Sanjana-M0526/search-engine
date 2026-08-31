@@ -347,8 +347,9 @@ async def search(
 
         "pageno": page,
 
-        "categories":
-            searx_category,
+        "categories":searx_category,
+        "language": "en",
+        "safesearch": 0
 
     }
 
@@ -626,12 +627,7 @@ async def search(
     # TOTAL
     # ========================================================
 
-    total = (
-        data.get(
-            "number_of_results"
-        )
-        or len(results)
-    )
+    total = len(results)
 
 
     # ========================================================
