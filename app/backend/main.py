@@ -229,8 +229,7 @@ async def search(
 
         try:
 
-            local_results =
-                search_documents(q)
+            local_results = search_documents(q)
 
         except Exception as error:
 
@@ -251,8 +250,7 @@ async def search(
 
         for result in local_results:
 
-            url =
-                result.get(
+            url =result.get(
                     "url",
                     ""
                 )
@@ -756,16 +754,14 @@ async def search_searxng_html(
     # NORMAL SEARXNG RESULTS
     # ========================================================
 
-    articles =
-        soup.select(
+    articles =soup.select(
             "article.result"
         )
 
 
     if not articles:
 
-        articles =
-            soup.select(
+        articles =soup.select(
                 ".result"
             )
 
@@ -789,8 +785,7 @@ async def search_searxng_html(
             continue
 
 
-        url =
-            link.get(
+        url =link.get(
                 "href",
                 ""
             )
@@ -812,36 +807,31 @@ async def search_searxng_html(
         seen_urls.add(url)
 
 
-        title =
-            link.get_text(
+        title =link.get_text(
                 " ",
                 strip=True
             )
 
 
-        content_element =
-            article.select_one(
+        content_element =article.select_one(
                 ".content"
             )
 
 
         if not content_element:
 
-            content_element =
-                article.select_one(
+            content_element =article.select_one(
                     ".result-content"
                 )
 
 
-        content =
-            content_element.get_text(
+        content =content_element.get_text(
                 " ",
                 strip=True
             ) if content_element else ""
 
 
-        domain =
-            urlparse(
+        domain =urlparse(
                 url
             ).netloc
 
@@ -980,8 +970,7 @@ async def index_page(
 
     try:
 
-        result =
-            crawl_page(
+        result =crawl_page(
                 request.url
             )
 
@@ -1015,8 +1004,7 @@ async def my_index_search(
     q: str
 ):
 
-    results =
-        search_documents(q)
+    results =search_documents(q)
 
 
     formatted_results = []
@@ -1086,8 +1074,7 @@ async def crawl(url: str):
 
     try:
 
-        result =
-            crawl_page(url)
+        result =crawl_page(url)
 
 
         return {
