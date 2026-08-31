@@ -71,13 +71,13 @@ async function performSearch(page = 1) {
         params.set("q", query);
         params.set("format", "json");
         params.set("pageno", page);
-        params.set("categories", currentCategory);
+        params.set("category", currentCategory);
 
         // Add time filter if selected
         const timeValue = timeFilter.value;
 
         if (timeValue) {
-            params.set("time_range", timeValue);
+            params.set("time", timeValue);
         }
 
         const response = await fetch(
