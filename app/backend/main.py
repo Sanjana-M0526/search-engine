@@ -14,7 +14,7 @@ from .crawler import crawl_page
 from .database import (
     initialize_database,
     search_documents,
-    count_documents
+    count_documents,
 )
 
 
@@ -24,9 +24,13 @@ from .database import (
 
 app = FastAPI(
     title="My Search Engine API",
-    version="1.0.0"
+    version="1.0.0",
 )
 
+
+# ============================================================
+# DATABASE
+# ============================================================
 
 initialize_database()
 
@@ -43,12 +47,12 @@ INDEX_FILE = FRONTEND_DIR / "index.html"
 
 
 # ============================================================
-# SEARCH SERVER
+# SEARXNG SEARCH SERVER
 # ============================================================
 
 SEARCH_SERVER_URL = os.getenv(
     "SEARCH_SERVER_URL",
-    "https://search-engine-1a2i.onrender.com/search"
+    "https://search-engine-1a2i.onrender.com/search",
 )
 
 
@@ -58,19 +62,15 @@ SEARCH_SERVER_URL = os.getenv(
 
 app.add_middleware(
     CORSMiddleware,
-
     allow_origins=["*"],
-
     allow_credentials=False,
-
     allow_methods=["*"],
-
     allow_headers=["*"],
 )
 
 
 # ============================================================
-# HISTORY
+# SEARCH HISTORY
 # ============================================================
 
 search_history = []
@@ -85,7 +85,7 @@ if FRONTEND_DIR.exists():
     app.mount(
         "/static",
         StaticFiles(directory=str(FRONTEND_DIR)),
-        name="static"
+        name="static",
     )
 
 
@@ -107,8 +107,9 @@ async def home():
             "/index",
             "/crawl",
             "/my-index",
-            "/health"
-        ]
+            "/health",
+            "/api",
+        ],
     }
 
 
@@ -122,7 +123,7 @@ async def health():
     return {
         "status": "ok",
         "service": "My Search Engine",
-        "documents": count_documents()
+        "documents": count_documents(),
     }
 
 
@@ -135,7 +136,7 @@ async def search(
     q: str,
     page: int = 1,
     category: str = "all",
-    time: str = ""
+    time: str = "",
 ):
 
     q = q.strip()
@@ -148,20 +149,16 @@ async def search(
             "total": 0,
             "page": page,
             "category": category,
-            "time": time
+            "time": time,
         }
 
-
     # --------------------------------------------------------
-    # HISTORY
+    # SAVE SEARCH HISTORY
     # --------------------------------------------------------
 
     if q not in search_history:
 
-        search_history.insert(
-            0,
-            q
-        )
+        search_history.insert(0, q)
 
     search_history[:] = search_history[:10]
 
@@ -178,59 +175,50 @@ async def search(
 
         for result in local_results:
 
+            url = result.get("url", "")
+
+            try:
+                domain = urlparse(url).netloc
+            except Exception:
+                domain = ""
+
             formatted.append({
-
-                "url": result["url"],
-
-                "title": result["title"]
-                or "Untitled",
-
-                "content": result["content"]
-                or "No description available.",
-
+                "url": url,
+                "title": result.get("title") or "Untitled",
+                "content": (
+                    result.get("content")
+                    or "No description available."
+                ),
                 "engine": "my index",
-
                 "category": "local",
-
-                "score": result["score"],
-
-                "domain": urlparse(
-                    result["url"]
-                ).netloc
-
+                "score": result.get("score", 0),
+                "domain": domain,
             })
 
         return {
-
             "query": q,
-
             "results": formatted,
-
             "total": len(formatted),
-
             "page": page,
-
             "category": category,
-
-            "time": time
-
+            "time": time,
         }
 
 
     # --------------------------------------------------------
-    # EXTERNAL SEARCH
+    # EXTERNAL SEARXNG SEARCH
     # --------------------------------------------------------
 
     search_params = {
-
         "q": q,
-
         "format": "json",
-
-        "pageno": page
-
+        "pageno": page,
     }
 
+
+    # --------------------------------------------------------
+    # CATEGORY
+    # --------------------------------------------------------
 
     if category == "news":
 
@@ -240,13 +228,25 @@ async def search(
 
         search_params["categories"] = "images"
 
+    elif category == "videos":
+
+        search_params["categories"] = "videos"
+
+    elif category == "map":
+
+        search_params["categories"] = "map"
+
+    elif category == "science":
+
+        search_params["categories"] = "science"
+
     else:
 
         search_params["categories"] = "general"
 
 
     # --------------------------------------------------------
-    # TIME
+    # TIME FILTER
     # --------------------------------------------------------
 
     valid_time_ranges = [
@@ -254,7 +254,7 @@ async def search(
         "day",
         "week",
         "month",
-        "year"
+        "year",
     ]
 
     if time in valid_time_ranges:
@@ -263,57 +263,56 @@ async def search(
 
 
     # --------------------------------------------------------
-    # CALL SEARCH SERVER
+    # CALL SEARXNG
     # --------------------------------------------------------
 
     try:
 
         async with httpx.AsyncClient(
-            timeout=30.0
+            timeout=30.0,
+            follow_redirects=True,
         ) as client:
 
             response = await client.get(
                 SEARCH_SERVER_URL,
-                params=search_params
+                params=search_params,
             )
 
             response.raise_for_status()
 
             data = response.json()
 
+    except httpx.TimeoutException:
+
+        return {
+            "query": q,
+            "results": [],
+            "total": 0,
+            "page": page,
+            "category": category,
+            "time": time,
+            "error": "Search request timed out.",
+        }
 
     except Exception as error:
 
         return {
-
             "query": q,
-
             "results": [],
-
             "total": 0,
-
             "page": page,
-
             "category": category,
-
             "time": time,
-
-            "error":
-                "External search service unavailable",
-
-            "details": str(error)
-
+            "error": "External search service unavailable.",
+            "details": str(error),
         }
 
 
     # --------------------------------------------------------
-    # NORMALIZE
+    # NORMALIZE RESULTS
     # --------------------------------------------------------
 
-    raw_results = data.get(
-        "results",
-        []
-    )
+    raw_results = data.get("results", [])
 
     results = []
 
@@ -322,10 +321,7 @@ async def search(
 
     for result in raw_results:
 
-        url = result.get(
-            "url",
-            ""
-        )
+        url = result.get("url", "")
 
         if not url:
             continue
@@ -351,9 +347,7 @@ async def search(
 
         try:
 
-            domain = urlparse(
-                url
-            ).netloc
+            domain = urlparse(url).netloc
 
         except Exception:
 
@@ -361,40 +355,30 @@ async def search(
 
 
         results.append({
-
             "url": url,
-
             "title": title,
-
             "content": content,
-
             "engine": result.get(
                 "engine",
-                "search"
+                "search",
             ),
-
             "category": result.get(
                 "category",
-                category
+                category,
             ),
-
             "score": result.get(
                 "score",
-                0
+                0,
             ),
-
             "domain": domain,
-
             "thumbnail": result.get(
                 "thumbnail",
-                ""
+                "",
             ),
-
             "img_src": result.get(
                 "img_src",
-                ""
-            )
-
+                "",
+            ),
         })
 
 
@@ -404,24 +388,21 @@ async def search(
 
     total = data.get(
         "number_of_results",
-        len(results)
+        len(results),
     )
 
 
+    # --------------------------------------------------------
+    # RESPONSE
+    # --------------------------------------------------------
+
     return {
-
         "query": q,
-
         "results": results,
-
         "total": total,
-
         "page": page,
-
         "category": category,
-
-        "time": time
-
+        "time": time,
     }
 
 
@@ -440,7 +421,6 @@ async def suggestions(q: str):
             "suggestions": []
         }
 
-
     values = []
 
     for item in search_history:
@@ -451,12 +431,8 @@ async def suggestions(q: str):
 
                 values.append(item)
 
-
     return {
-
-        "suggestions":
-            values[:5]
-
+        "suggestions": values[:5]
     }
 
 
@@ -468,17 +444,12 @@ async def suggestions(q: str):
 async def history():
 
     return {
-
         "history": [
-
             {
                 "query": item
             }
-
             for item in search_history
-
         ]
-
     }
 
 
@@ -492,47 +463,51 @@ class IndexRequest(BaseModel):
 
 
 # ============================================================
-# INDEX
+# ADD WEBSITE TO INDEX
 # ============================================================
 
 @app.post("/index")
 async def index_page(
-    request: IndexRequest
+    request: IndexRequest,
 ):
+
+    url = request.url.strip()
+
+    if not url:
+
+        raise HTTPException(
+            status_code=400,
+            detail="URL is required.",
+        )
 
     try:
 
-        result = crawl_page(
-            request.url
-        )
+        result = crawl_page(url)
 
         return {
-
             "success": True,
-
-            "message":
-                "Page indexed successfully",
-
-            "data": result
-
+            "message": "Page indexed successfully.",
+            "data": result,
         }
 
     except Exception as error:
 
         raise HTTPException(
             status_code=400,
-            detail=str(error)
+            detail=str(error),
         )
 
 
 # ============================================================
-# MY INDEX
+# MY INDEX SEARCH
 # ============================================================
 
 @app.get("/my-index")
 async def my_index_search(
-    q: str
+    q: str,
 ):
+
+    q = q.strip()
 
     results = search_documents(q)
 
@@ -541,38 +516,27 @@ async def my_index_search(
     for result in results:
 
         formatted_results.append({
-
-            "url":
-                result["url"],
-
-            "title":
-                result["title"],
-
-            "content":
-                result["content"],
-
-            "engine":
-                "my index",
-
-            "category":
-                "local",
-
-            "score":
-                result["score"]
-
+            "url": result.get("url", ""),
+            "title": result.get(
+                "title",
+                "Untitled",
+            ),
+            "content": result.get(
+                "content",
+                "",
+            ),
+            "engine": "my index",
+            "category": "local",
+            "score": result.get(
+                "score",
+                0,
+            ),
         })
 
-
     return {
-
         "query": q,
-
-        "total":
-            len(formatted_results),
-
-        "results":
-            formatted_results
-
+        "total": len(formatted_results),
+        "results": formatted_results,
     }
 
 
@@ -581,57 +545,36 @@ async def my_index_search(
 # ============================================================
 
 @app.post("/crawl")
-async def crawl(
-    url: str
-):
+async def crawl(url: str):
 
     try:
 
         result = crawl_page(url)
 
         return {
-
             "success": True,
-
-            "message":
-                "Page indexed successfully",
-
-            "data":
-                result
-
+            "message": "Page indexed successfully.",
+            "data": result,
         }
 
     except Exception as error:
 
         return {
-
             "success": False,
-
-            "message":
-                str(error)
-
+            "message": str(error),
         }
 
 
 # ============================================================
-# API INFO
+# API INFORMATION
 # ============================================================
 
 @app.get("/api")
 async def api_info():
 
     return {
-
-        "name":
-            "My Search Engine",
-
-        "version":
-            "1.0.0",
-
-        "status":
-            "running",
-
-        "documents":
-            count_documents()
-
+        "name": "My Search Engine",
+        "version": "1.0.0",
+        "status": "running",
+        "documents": count_documents(),
     }
