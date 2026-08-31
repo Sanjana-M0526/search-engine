@@ -1,12 +1,7 @@
 // ======================================================
-// MY SEARCH ENGINE - COMPLETE FRONTEND SCRIPT
+// MY SEARCH ENGINE - FRONTEND
 // ======================================================
 
-// ======================================================
-// CONFIGURATION
-// ======================================================
-
-// Your Render backend
 const API_BASE_URL =
     window.API_BASE_URL ||
     "https://search-engine-backend-0bba.onrender.com";
@@ -16,34 +11,19 @@ const API_BASE_URL =
 // DOM ELEMENTS
 // ======================================================
 
-const searchInput =
-    document.getElementById("searchInput");
+const searchInput = document.getElementById("searchInput");
+const searchButton = document.getElementById("searchButton");
+const resultsContainer = document.getElementById("resultsContainer");
+const resultsHeader = document.getElementById("resultsHeader");
+const paginationContainer = document.getElementById("paginationContainer");
+const timeFilter = document.getElementById("timeFilter");
+const historyContainer = document.getElementById("historyContainer");
 
-const searchButton =
-    document.getElementById("searchButton");
-
-const resultsContainer =
-    document.getElementById("resultsContainer");
-
-const resultsHeader =
-    document.getElementById("resultsHeader");
-
-const paginationContainer =
-    document.getElementById("paginationContainer");
-
-const timeFilter =
-    document.getElementById("timeFilter");
-
-const historyContainer =
-    document.getElementById("historyContainer");
-
-
-// Add URL elements
 const websiteInput =
     document.getElementById("websiteInput") ||
     document.getElementById("urlInput") ||
     document.querySelector(
-        'input[placeholder*="website URL"]'
+        'input[placeholder*="website URL"], input[placeholder*="Website URL"]'
     );
 
 const addUrlButton =
@@ -59,9 +39,7 @@ const addUrlButton =
 // ======================================================
 
 let currentQuery = "";
-
 let currentPage = 1;
-
 let currentCategory = "all";
 
 
@@ -69,20 +47,57 @@ let currentCategory = "all";
 // INITIALIZATION
 // ======================================================
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+document.addEventListener("DOMContentLoaded", () => {
 
-        setupFilterButtons();
+    console.log("My Search Engine frontend loaded.");
+    console.log("Backend:", API_BASE_URL);
 
-        setupSearchEvents();
+    setupFilterButtons();
+    setupSearchEvents();
+    setupAddUrl();
+    displaySearchHistory();
 
-        setupAddUrl();
+    checkBackend();
 
-        displaySearchHistory();
+});
+
+
+// ======================================================
+// CHECK BACKEND
+// ======================================================
+
+async function checkBackend() {
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE_URL}/health`,
+            {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Backend HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        console.log("Backend health:", data);
+
+    } catch (error) {
+
+        console.error(
+            "Backend health check failed:",
+            error
+        );
 
     }
-);
+
+}
 
 
 // ======================================================
@@ -93,52 +108,39 @@ function setupSearchEvents() {
 
     if (searchButton) {
 
-        searchButton.addEventListener(
-            "click",
-            function () {
-
-                performSearch(1);
-
-            }
-        );
+        searchButton.addEventListener("click", () => {
+            performSearch(1);
+        });
 
     }
 
 
     if (searchInput) {
 
-        searchInput.addEventListener(
-            "keydown",
-            function (event) {
+        searchInput.addEventListener("keydown", (event) => {
 
-                if (event.key === "Enter") {
+            if (event.key === "Enter") {
 
-                    event.preventDefault();
+                event.preventDefault();
 
-                    performSearch(1);
-
-                }
+                performSearch(1);
 
             }
-        );
+
+        });
 
     }
 
 
     if (timeFilter) {
 
-        timeFilter.addEventListener(
-            "change",
-            function () {
+        timeFilter.addEventListener("change", () => {
 
-                if (currentQuery) {
-
-                    performSearch(1);
-
-                }
-
+            if (currentQuery) {
+                performSearch(1);
             }
-        );
+
+        });
 
     }
 
@@ -151,108 +153,50 @@ function setupSearchEvents() {
 
 function setupFilterButtons() {
 
-    const buttons =
-        document.querySelectorAll(
-            "button"
-        );
-
-
-    buttons.forEach(
-        function (button) {
-
-            const text =
-                button.textContent
-                    .trim()
-                    .toLowerCase();
-
-
-            let category = null;
-
-
-            if (text === "all") {
-
-                category = "all";
-
-            }
-
-            else if (text === "web") {
-
-                category = "web";
-
-            }
-
-            else if (text === "news") {
-
-                category = "news";
-
-            }
-
-            else if (text === "images") {
-
-                category = "images";
-
-            }
-
-            else if (
-                text === "my index" ||
-                text === "my-index"
-            ) {
-
-                category = "my-index";
-
-            }
-
-
-            if (!category) {
-
-                return;
-
-            }
-
-
-            button.dataset.category =
-                category;
-
-
-            button.addEventListener(
-                "click",
-                function (event) {
-
-                    event.preventDefault();
-
-
-                    setActiveFilter(
-                        category,
-                        button
-                    );
-
-
-                    if (currentQuery) {
-
-                        performSearch(1);
-
-                    }
-
-                }
-            );
-
-        }
+    const buttons = document.querySelectorAll(
+        ".filter-button, [data-category]"
     );
 
+    let allButton = null;
 
-    // Set All as default
-    const allButton =
-        Array.from(buttons).find(
-            function (button) {
 
-                return (
-                    button.textContent
-                        .trim()
-                        .toLowerCase() === "all"
-                );
+    buttons.forEach((button) => {
 
+        let category =
+            button.dataset.category ||
+            getCategoryFromButtonText(button.textContent);
+
+
+        if (!category) {
+            return;
+        }
+
+
+        button.dataset.category = category;
+
+
+        if (category === "all") {
+            allButton = button;
+        }
+
+
+        button.addEventListener("click", (event) => {
+
+            event.preventDefault();
+
+            setActiveFilter(
+                category,
+                button
+            );
+
+
+            if (currentQuery) {
+                performSearch(1);
             }
-        );
+
+        });
+
+    });
 
 
     if (allButton) {
@@ -268,6 +212,48 @@ function setupFilterButtons() {
 
 
 // ======================================================
+// GET CATEGORY
+// ======================================================
+
+function getCategoryFromButtonText(text) {
+
+    const value =
+        String(text || "")
+            .trim()
+            .toLowerCase();
+
+
+    if (value === "all") {
+        return "all";
+    }
+
+    if (value === "web") {
+        return "web";
+    }
+
+    if (value === "news") {
+        return "news";
+    }
+
+    if (value === "images" || value === "image") {
+        return "images";
+    }
+
+    if (
+        value === "my index" ||
+        value === "my-index" ||
+        value === "myindex"
+    ) {
+        return "my-index";
+    }
+
+
+    return null;
+
+}
+
+
+// ======================================================
 // SET ACTIVE FILTER
 // ======================================================
 
@@ -276,41 +262,34 @@ function setActiveFilter(
     clickedButton
 ) {
 
-    currentCategory =
-        category;
+    currentCategory = category;
 
 
-    const buttons =
-        document.querySelectorAll(
-            "button"
-        );
-
-
-    buttons.forEach(
-        function (button) {
-
-            if (
-                button.dataset &&
-                button.dataset.category
-            ) {
-
-                button.classList.remove(
-                    "active-filter"
-                );
-
-            }
-
-        }
+    const buttons = document.querySelectorAll(
+        ".filter-button, [data-category]"
     );
+
+
+    buttons.forEach((button) => {
+
+        button.classList.remove("active");
+        button.classList.remove("active-filter");
+
+    });
 
 
     if (clickedButton) {
 
-        clickedButton.classList.add(
-            "active-filter"
-        );
+        clickedButton.classList.add("active");
+        clickedButton.classList.add("active-filter");
 
     }
+
+
+    console.log(
+        "Current category:",
+        currentCategory
+    );
 
 }
 
@@ -319,14 +298,10 @@ function setActiveFilter(
 // PERFORM SEARCH
 // ======================================================
 
-async function performSearch(
-    page = 1
-) {
+async function performSearch(page = 1) {
 
-    if (!searchInput) {
-
+    if (!searchInput || !resultsContainer) {
         return;
-
     }
 
 
@@ -340,14 +315,12 @@ async function performSearch(
             <div class="error-message">
                 <h3>Please enter a search term</h3>
                 <p>
-                    Enter something in the search box
-                    and try again.
+                    Enter something in the search box and try again.
                 </p>
             </div>
         `;
 
         resultsHeader.innerHTML = "";
-
         paginationContainer.innerHTML = "";
 
         return;
@@ -355,69 +328,43 @@ async function performSearch(
     }
 
 
-    currentQuery =
-        query;
-
-    currentPage =
-        page;
+    currentQuery = query;
+    currentPage = page;
 
 
-    // Disable search button
     if (searchButton) {
 
-        searchButton.disabled =
-            true;
-
-        searchButton.textContent =
-            "Searching...";
+        searchButton.disabled = true;
+        searchButton.textContent = "Searching...";
 
     }
 
 
-    // Loading state
     resultsContainer.innerHTML = `
         <div class="loading-container">
-
             <div class="loading-spinner"></div>
 
             <div class="loading">
                 Searching...
             </div>
-
         </div>
     `;
 
 
-    resultsHeader.innerHTML =
-        "";
-
-    paginationContainer.innerHTML =
-        "";
+    resultsHeader.innerHTML = "";
+    paginationContainer.innerHTML = "";
 
 
     try {
 
-        const params =
-            new URLSearchParams();
+        const params = new URLSearchParams();
 
 
-        params.set(
-            "q",
-            query
-        );
+        params.set("q", query);
 
-
-        params.set(
-            "format",
-            "json"
-        );
-
-
-        params.set(
-            "pageno",
-            String(page)
-        );
-
+        // IMPORTANT:
+        // Backend expects "page"
+        params.set("page", String(page));
 
         params.set(
             "category",
@@ -425,7 +372,6 @@ async function performSearch(
         );
 
 
-        // Time filter
         if (
             timeFilter &&
             timeFilter.value
@@ -444,7 +390,7 @@ async function performSearch(
 
 
         console.log(
-            "Searching:",
+            "SEARCH REQUEST:",
             url
         );
 
@@ -454,6 +400,7 @@ async function performSearch(
                 url,
                 {
                     method: "GET",
+
                     headers: {
                         "Accept":
                             "application/json"
@@ -462,41 +409,73 @@ async function performSearch(
             );
 
 
+        const responseText =
+            await response.text();
+
+
+        console.log(
+            "Backend status:",
+            response.status
+        );
+
+
+        console.log(
+            "Backend response:",
+            responseText
+        );
+
+
         if (!response.ok) {
 
             throw new Error(
-                `Backend returned ${response.status}`
+                `Backend returned HTTP ${response.status}: ${responseText}`
             );
 
         }
 
 
-        const data =
-            await response.json();
+        let data;
+
+        try {
+
+            data =
+                JSON.parse(responseText);
+
+        } catch {
+
+            throw new Error(
+                "Backend did not return valid JSON."
+            );
+
+        }
 
 
         console.log(
-            "Search response:",
+            "Parsed search data:",
             data
         );
 
 
-        displayResults(
-            data
-        );
+        if (data.error) {
+
+            console.error(
+                "Search backend error:",
+                data.error,
+                data.details
+            );
+
+        }
 
 
-        saveSearchHistory(
-            query
-        );
+        displayResults(data);
 
+
+        saveSearchHistory(query);
 
         displaySearchHistory();
 
 
-    }
-
-    catch (error) {
+    } catch (error) {
 
         console.error(
             "Search error:",
@@ -516,35 +495,27 @@ async function performSearch(
                 </h3>
 
                 <p>
-                    Unable to connect to the
-                    search backend.
+                    ${escapeHTML(error.message)}
                 </p>
 
                 <p class="small-text">
-                    Please try again in a few seconds.
+                    Open the browser console (F12) for more details.
                 </p>
 
             </div>
         `;
 
 
-        resultsHeader.innerHTML =
-            "";
+        resultsHeader.innerHTML = "";
+        paginationContainer.innerHTML = "";
 
-        paginationContainer.innerHTML =
-            "";
 
-    }
-
-    finally {
+    } finally {
 
         if (searchButton) {
 
-            searchButton.disabled =
-                false;
-
-            searchButton.textContent =
-                "Search";
+            searchButton.disabled = false;
+            searchButton.textContent = "Search";
 
         }
 
@@ -557,9 +528,7 @@ async function performSearch(
 // DISPLAY RESULTS
 // ======================================================
 
-function displayResults(
-    data
-) {
+function displayResults(data) {
 
     const results =
         Array.isArray(data.results)
@@ -568,25 +537,59 @@ function displayResults(
 
 
     // --------------------------------------------------
+    // BACKEND ERROR
+    // --------------------------------------------------
+
+    if (data.error) {
+
+        resultsHeader.innerHTML = `
+            Search error:
+            <strong>
+                ${escapeHTML(data.error)}
+            </strong>
+        `;
+
+
+        resultsContainer.innerHTML = `
+            <div class="error-message">
+
+                <div class="error-icon">
+                    ⚠️
+                </div>
+
+                <h3>
+                    Search service error
+                </h3>
+
+                <p>
+                    ${escapeHTML(
+                        data.details ||
+                        "The search server returned an error."
+                    )}
+                </p>
+
+            </div>
+        `;
+
+        paginationContainer.innerHTML = "";
+
+        return;
+
+    }
+
+
+    // --------------------------------------------------
     // NO RESULTS
     // --------------------------------------------------
 
-    if (
-        results.length === 0
-    ) {
+    if (results.length === 0) {
 
-        resultsHeader.innerHTML =
-            data.query ||
-            currentQuery
-                ? `
-                    Found 0 result(s)
-                    for
-                    "<strong>${escapeHTML(
-                        data.query ||
-                        currentQuery
-                    )}</strong>"
-                `
-                : "";
+        resultsHeader.innerHTML = `
+            Found <strong>0</strong> result(s) for
+            "<strong>${escapeHTML(
+                data.query || currentQuery
+            )}</strong>"
+        `;
 
 
         resultsContainer.innerHTML = `
@@ -601,16 +604,14 @@ function displayResults(
                 </h2>
 
                 <p>
-                    Try a different search term.
+                    Try another search term or check the search server.
                 </p>
 
             </div>
         `;
 
 
-        paginationContainer.innerHTML =
-            "";
-
+        paginationContainer.innerHTML = "";
 
         return;
 
@@ -618,7 +619,7 @@ function displayResults(
 
 
     // --------------------------------------------------
-    // RESULTS HEADER
+    // HEADER
     // --------------------------------------------------
 
     const total =
@@ -628,73 +629,49 @@ function displayResults(
 
     resultsHeader.innerHTML = `
         Found
-        <strong>${escapeHTML(
-            String(total)
-        )}</strong>
+        <strong>${escapeHTML(String(total))}</strong>
         result(s) for
         "<strong>${escapeHTML(
-            data.query ||
-            currentQuery
+            data.query || currentQuery
         )}</strong>"
     `;
 
 
-    // --------------------------------------------------
-    // CLEAR OLD RESULTS
-    // --------------------------------------------------
-
-    resultsContainer.innerHTML =
-        "";
+    resultsContainer.innerHTML = "";
 
 
     // --------------------------------------------------
-    // IMAGE RESULTS
+    // IMAGES
     // --------------------------------------------------
 
-    if (
-        currentCategory ===
-        "images"
-    ) {
+    if (currentCategory === "images") {
 
-        displayImageResults(
-            results
-        );
+        displayImageResults(results);
 
     }
 
     // --------------------------------------------------
-    // NORMAL RESULTS
+    // NORMAL
     // --------------------------------------------------
 
     else {
 
-        results.forEach(
-            function (result, index) {
+        results.forEach((result, index) => {
 
-                const card =
-                    createResultCard(
-                        result,
-                        index + 1
-                    );
-
-
-                resultsContainer.appendChild(
-                    card
+            const card =
+                createResultCard(
+                    result,
+                    index + 1
                 );
 
-            }
-        );
+            resultsContainer.appendChild(card);
+
+        });
 
     }
 
 
-    // --------------------------------------------------
-    // PAGINATION
-    // --------------------------------------------------
-
-    createPagination(
-        data
-    );
+    createPagination(data);
 
 }
 
@@ -703,50 +680,37 @@ function displayResults(
 // IMAGE RESULTS
 // ======================================================
 
-function displayImageResults(
-    results
-) {
+function displayImageResults(results) {
 
     const grid =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     grid.className =
         "image-results-grid";
 
 
-    results.forEach(
-        function (
-            result,
-            index
-        ) {
+    results.forEach((result, index) => {
 
-            const card =
-                createImageCard(
-                    result,
-                    index + 1
-                );
-
-
-            grid.appendChild(
-                card
+        const card =
+            createImageCard(
+                result,
+                index + 1
             );
 
-        }
-    );
+
+        grid.appendChild(card);
+
+    });
 
 
-    resultsContainer.appendChild(
-        grid
-    );
+    resultsContainer.appendChild(grid);
 
 }
 
 
 // ======================================================
-// CREATE IMAGE CARD
+// IMAGE CARD
 // ======================================================
 
 function createImageCard(
@@ -755,9 +719,7 @@ function createImageCard(
 ) {
 
     const card =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     card.className =
@@ -772,22 +734,18 @@ function createImageCard(
 
     const pageUrl =
         result.url ||
-        result.source ||
         result.link ||
+        result.source ||
         "#";
 
 
-    /*
-     * Different image APIs use different
-     * property names.
-     */
-
+    // SearXNG normally uses img_src
     const imageUrl =
+        result.img_src ||
         result.thumbnail ||
         result.thumbnail_url ||
         result.image ||
         result.image_url ||
-        result.img ||
         result.preview ||
         result.preview_url ||
         result.media_url ||
@@ -796,16 +754,13 @@ function createImageCard(
 
 
     const domain =
-        getDomain(
-            pageUrl
-        );
+        getDomain(pageUrl);
 
 
     card.innerHTML = `
+
         <a
-            href="${escapeAttribute(
-                pageUrl
-            )}"
+            href="${escapeAttribute(pageUrl)}"
             target="_blank"
             rel="noopener noreferrer"
             class="image-link"
@@ -815,12 +770,8 @@ function createImageCard(
                 imageUrl
                     ? `
                         <img
-                            src="${escapeAttribute(
-                                imageUrl
-                            )}"
-                            alt="${escapeAttribute(
-                                title
-                            )}"
+                            src="${escapeAttribute(imageUrl)}"
+                            alt="${escapeAttribute(title)}"
                             class="result-image"
                             loading="lazy"
                             onerror="
@@ -845,6 +796,7 @@ function createImageCard(
 
         </a>
 
+
         <div class="image-result-info">
 
             <div class="image-result-number">
@@ -852,18 +804,15 @@ function createImageCard(
             </div>
 
             <div class="image-result-title">
-                ${escapeHTML(
-                    title
-                )}
+                ${escapeHTML(title)}
             </div>
 
             <div class="image-result-domain">
-                ${escapeHTML(
-                    domain
-                )}
+                ${escapeHTML(domain)}
             </div>
 
         </div>
+
     `;
 
 
@@ -873,7 +822,7 @@ function createImageCard(
 
 
 // ======================================================
-// CREATE NORMAL RESULT CARD
+// NORMAL RESULT CARD
 // ======================================================
 
 function createResultCard(
@@ -882,9 +831,7 @@ function createResultCard(
 ) {
 
     const card =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     card.className =
@@ -893,6 +840,7 @@ function createResultCard(
 
     const title =
         result.title ||
+        result.name ||
         "Untitled result";
 
 
@@ -921,19 +869,17 @@ function createResultCard(
             : "";
 
 
-    const domain =
-        getDomain(
-            url
-        );
-
-
-    // Optional date
     const date =
         result.date ||
         result.published ||
         result.published_at ||
         result.timestamp ||
         "";
+
+
+    const domain =
+        result.domain ||
+        getDomain(url);
 
 
     card.innerHTML = `
@@ -944,30 +890,22 @@ function createResultCard(
 
 
         <div class="result-domain">
-            ${escapeHTML(
-                domain
-            )}
+            ${escapeHTML(domain)}
         </div>
 
 
         <a
             class="result-title"
-            href="${escapeAttribute(
-                url
-            )}"
+            href="${escapeAttribute(url)}"
             target="_blank"
             rel="noopener noreferrer"
         >
-            ${escapeHTML(
-                title
-            )}
+            ${escapeHTML(title)}
         </a>
 
 
         <div class="result-content">
-            ${escapeHTML(
-                content
-            )}
+            ${escapeHTML(content)}
         </div>
 
 
@@ -978,9 +916,7 @@ function createResultCard(
                     ? `
                         <span>
                             Engine:
-                            ${escapeHTML(
-                                engine
-                            )}
+                            ${escapeHTML(engine)}
                         </span>
                     `
                     : ""
@@ -991,9 +927,7 @@ function createResultCard(
                 date
                     ? `
                         <span>
-                            ${escapeHTML(
-                                String(date)
-                            )}
+                            ${escapeHTML(String(date))}
                         </span>
                     `
                     : ""
@@ -1005,9 +939,7 @@ function createResultCard(
                     ? `
                         <span class="score">
                             Score:
-                            ${escapeHTML(
-                                String(score)
-                            )}
+                            ${escapeHTML(String(score))}
                         </span>
                     `
                     : ""
@@ -1027,15 +959,12 @@ function createResultCard(
 // PAGINATION
 // ======================================================
 
-function createPagination(
-    data
-) {
+function createPagination(data) {
 
-    paginationContainer.innerHTML =
-        "";
+    paginationContainer.innerHTML = "";
 
 
-    const currentPageNumber =
+    const page =
         Number(data.page) ||
         currentPage;
 
@@ -1046,16 +975,6 @@ function createPagination(
             : [];
 
 
-    const total =
-        Number(data.total) ||
-        0;
-
-
-    /*
-     * Default page size appears to be
-     * around 20 results in your backend.
-     */
-
     const pageSize =
         Number(
             data.per_page ||
@@ -1065,19 +984,41 @@ function createPagination(
         );
 
 
-    const hasNextPage =
-        data.has_next !== undefined
-            ? Boolean(data.has_next)
-            : results.length >= pageSize;
+    const total =
+        Number(data.total) ||
+        0;
 
 
-    const hasPreviousPage =
-        currentPageNumber > 1;
+    const hasPrevious =
+        page > 1;
+
+
+    let hasNext = false;
 
 
     if (
-        !hasPreviousPage &&
-        !hasNextPage
+        typeof data.has_next === "boolean"
+    ) {
+
+        hasNext =
+            data.has_next;
+
+    } else if (total > 0) {
+
+        hasNext =
+            page * pageSize < total;
+
+    } else {
+
+        hasNext =
+            results.length >= pageSize;
+
+    }
+
+
+    if (
+        !hasPrevious &&
+        !hasNext
     ) {
 
         return;
@@ -1086,9 +1027,7 @@ function createPagination(
 
 
     const pagination =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     pagination.className =
@@ -1097,9 +1036,7 @@ function createPagination(
 
     // Previous
     const previousButton =
-        document.createElement(
-            "button"
-        );
+        document.createElement("button");
 
 
     previousButton.className =
@@ -1111,19 +1048,17 @@ function createPagination(
 
 
     previousButton.disabled =
-        !hasPreviousPage;
+        !hasPrevious;
 
 
     previousButton.addEventListener(
         "click",
-        function () {
+        () => {
 
-            if (
-                currentPageNumber > 1
-            ) {
+            if (page > 1) {
 
                 performSearch(
-                    currentPageNumber - 1
+                    page - 1
                 );
 
                 window.scrollTo({
@@ -1137,11 +1072,9 @@ function createPagination(
     );
 
 
-    // Page number
+    // Page
     const pageNumber =
-        document.createElement(
-            "span"
-        );
+        document.createElement("span");
 
 
     pageNumber.className =
@@ -1149,14 +1082,12 @@ function createPagination(
 
 
     pageNumber.textContent =
-        `Page ${currentPageNumber}`;
+        `Page ${page}`;
 
 
     // Next
     const nextButton =
-        document.createElement(
-            "button"
-        );
+        document.createElement("button");
 
 
     nextButton.className =
@@ -1168,22 +1099,25 @@ function createPagination(
 
 
     nextButton.disabled =
-        !hasNextPage;
+        !hasNext;
 
 
     nextButton.addEventListener(
         "click",
-        function () {
+        () => {
 
-            performSearch(
-                currentPageNumber + 1
-            );
+            if (hasNext) {
 
+                performSearch(
+                    page + 1
+                );
 
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
+            }
 
         }
     );
@@ -1193,11 +1127,9 @@ function createPagination(
         previousButton
     );
 
-
     pagination.appendChild(
         pageNumber
     );
-
 
     pagination.appendChild(
         nextButton
@@ -1212,7 +1144,7 @@ function createPagination(
 
 
 // ======================================================
-// ADD WEBSITE TO MY INDEX
+// ADD WEBSITE
 // ======================================================
 
 function setupAddUrl() {
@@ -1239,11 +1171,9 @@ function setupAddUrl() {
 
     websiteInput.addEventListener(
         "keydown",
-        function (event) {
+        (event) => {
 
-            if (
-                event.key === "Enter"
-            ) {
+            if (event.key === "Enter") {
 
                 event.preventDefault();
 
@@ -1286,14 +1216,12 @@ async function addWebsite() {
 
         validUrl =
             new URL(
-                url.startsWith("http")
+                /^https?:\/\//i.test(url)
                     ? url
                     : `https://${url}`
             );
 
-    }
-
-    catch {
+    } catch {
 
         showTemporaryMessage(
             "Please enter a valid URL.",
@@ -1313,12 +1241,8 @@ async function addWebsite() {
         addUrlButton.textContent;
 
 
-    addUrlButton.disabled =
-        true;
-
-
-    addUrlButton.textContent =
-        "Adding...";
+    addUrlButton.disabled = true;
+    addUrlButton.textContent = "Adding...";
 
 
     try {
@@ -1344,17 +1268,21 @@ async function addWebsite() {
             );
 
 
+        const responseText =
+            await response.text();
+
+
         if (!response.ok) {
 
             throw new Error(
-                `Backend returned ${response.status}`
+                `HTTP ${response.status}: ${responseText}`
             );
 
         }
 
 
         const data =
-            await response.json();
+            JSON.parse(responseText);
 
 
         console.log(
@@ -1363,8 +1291,7 @@ async function addWebsite() {
         );
 
 
-        websiteInput.value =
-            "";
+        websiteInput.value = "";
 
 
         showTemporaryMessage(
@@ -1373,21 +1300,22 @@ async function addWebsite() {
         );
 
 
-        // If currently viewing My Index,
-        // refresh it.
         if (
-            currentCategory ===
-            "my-index" &&
-            currentQuery
+            currentCategory === "my-index"
         ) {
+
+            if (!currentQuery) {
+
+                currentQuery = "*";
+
+            }
 
             performSearch(1);
 
         }
 
-    }
 
-    catch (error) {
+    } catch (error) {
 
         console.error(
             "Add URL error:",
@@ -1396,19 +1324,15 @@ async function addWebsite() {
 
 
         showTemporaryMessage(
-            "Unable to add this website. Please try again.",
+            `Unable to add website: ${error.message}`,
             "error"
         );
 
-    }
 
-    finally {
+    } finally {
 
-        addUrlButton.disabled =
-            false;
-
-        addUrlButton.textContent =
-            originalText;
+        addUrlButton.disabled = false;
+        addUrlButton.textContent = originalText;
 
     }
 
@@ -1431,16 +1355,12 @@ function showTemporaryMessage(
 
 
     if (existing) {
-
         existing.remove();
-
     }
 
 
     const element =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     element.className =
@@ -1451,31 +1371,21 @@ function showTemporaryMessage(
         message;
 
 
-    document.body.appendChild(
-        element
-    );
+    document.body.appendChild(element);
 
 
-    setTimeout(
-        function () {
+    setTimeout(() => {
 
-            element.classList.add(
-                "hide"
-            );
+        element.classList.add("hide");
 
 
-            setTimeout(
-                function () {
+        setTimeout(() => {
 
-                    element.remove();
+            element.remove();
 
-                },
-                300
-            );
+        }, 300);
 
-        },
-        3000
-    );
+    }, 4000);
 
 }
 
@@ -1484,14 +1394,10 @@ function showTemporaryMessage(
 // SEARCH HISTORY
 // ======================================================
 
-function saveSearchHistory(
-    query
-) {
+function saveSearchHistory(query) {
 
     if (!query) {
-
         return;
-
     }
 
 
@@ -1504,13 +1410,10 @@ function saveSearchHistory(
             JSON.parse(
                 localStorage.getItem(
                     "searchHistory"
-                ) ||
-                "[]"
+                ) || "[]"
             );
 
-    }
-
-    catch {
+    } catch {
 
         history = [];
 
@@ -1519,48 +1422,33 @@ function saveSearchHistory(
 
     history =
         history.filter(
-            function (item) {
-
-                return (
-                    item !== query
-                );
-
-            }
+            item => item !== query
         );
 
 
-    history.unshift(
-        query
-    );
+    history.unshift(query);
 
 
     history =
-        history.slice(
-            0,
-            10
-        );
+        history.slice(0, 10);
 
 
     localStorage.setItem(
         "searchHistory",
-        JSON.stringify(
-            history
-        )
+        JSON.stringify(history)
     );
 
 }
 
 
 // ======================================================
-// DISPLAY SEARCH HISTORY
+// DISPLAY HISTORY
 // ======================================================
 
 function displaySearchHistory() {
 
     if (!historyContainer) {
-
         return;
-
     }
 
 
@@ -1573,22 +1461,17 @@ function displaySearchHistory() {
             JSON.parse(
                 localStorage.getItem(
                     "searchHistory"
-                ) ||
-                "[]"
+                ) || "[]"
             );
 
-    }
-
-    catch {
+    } catch {
 
         history = [];
 
     }
 
 
-    if (
-        history.length === 0
-    ) {
+    if (!history.length) {
 
         historyContainer.innerHTML = `
             <p class="muted">
@@ -1601,55 +1484,45 @@ function displaySearchHistory() {
     }
 
 
-    historyContainer.innerHTML =
-        "";
+    historyContainer.innerHTML = "";
 
 
-    history.forEach(
-        function (query) {
+    history.forEach((query) => {
 
-            const item =
-                document.createElement(
-                    "button"
-                );
+        const item =
+            document.createElement("button");
 
 
-            item.className =
-                "history-item";
+        item.className =
+            "history-item";
 
 
-            item.textContent =
-                query;
+        item.textContent =
+            query;
 
 
-            item.addEventListener(
-                "click",
-                function () {
+        item.addEventListener(
+            "click",
+            () => {
 
-                    searchInput.value =
-                        query;
+                searchInput.value =
+                    query;
 
+                performSearch(1);
 
-                    performSearch(
-                        1
-                    );
-
-                }
-            );
+            }
+        );
 
 
-            historyContainer.appendChild(
-                item
-            );
+        historyContainer.appendChild(item);
 
-        }
-    );
+    });
 
 }
 
 
 // ======================================================
-// CLEAR SEARCH HISTORY
+// CLEAR HISTORY
 // ======================================================
 
 function clearSearchHistory() {
@@ -1658,13 +1531,11 @@ function clearSearchHistory() {
         "searchHistory"
     );
 
-
     displaySearchHistory();
 
 }
 
 
-// Make available to HTML if needed
 window.clearSearchHistory =
     clearSearchHistory;
 
@@ -1673,9 +1544,7 @@ window.clearSearchHistory =
 // HELPERS
 // ======================================================
 
-function getDomain(
-    url
-) {
+function getDomain(url) {
 
     if (
         !url ||
@@ -1689,13 +1558,9 @@ function getDomain(
 
     try {
 
-        return new URL(
-            url
-        ).hostname;
+        return new URL(url).hostname;
 
-    }
-
-    catch {
+    } catch {
 
         return url;
 
@@ -1705,12 +1570,10 @@ function getDomain(
 
 
 // ======================================================
-// HTML ESCAPING
+// ESCAPE HTML
 // ======================================================
 
-function escapeHTML(
-    value
-) {
+function escapeHTML(value) {
 
     if (
         value === undefined ||
@@ -1723,9 +1586,7 @@ function escapeHTML(
 
 
     const div =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     div.textContent =
@@ -1738,12 +1599,10 @@ function escapeHTML(
 
 
 // ======================================================
-// ATTRIBUTE ESCAPING
+// ESCAPE ATTRIBUTE
 // ======================================================
 
-function escapeAttribute(
-    value
-) {
+function escapeAttribute(value) {
 
     if (
         value === undefined ||
@@ -1756,39 +1615,10 @@ function escapeAttribute(
 
 
     return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#39;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        );
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
 
 }
-
-
-// ======================================================
-// PAGE LOAD
-// ======================================================
-
-console.log(
-    "My Search Engine frontend loaded."
-);
-
-console.log(
-    "API:",
-    API_BASE_URL
-);

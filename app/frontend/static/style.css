@@ -1262,3 +1262,59 @@ button:disabled {
     }
 
 }
+/* ======================================================
+   EXTRA FIXES
+   ====================================================== */
+
+.filter-button {
+    cursor: pointer;
+    user-select: none;
+}
+
+.filter-button.active,
+.filter-button.active-filter {
+    background: #4285f4;
+    color: #ffffff;
+    border-color: #4285f4;
+}
+
+.filter-button:disabled,
+button:disabled {
+    cursor: not-allowed;
+}
+
+.result-title {
+    cursor: pointer;
+}
+
+.result-title:visited {
+    color: #0000b8;
+}
+
+.image-result-card {
+    min-width: 0;
+}
+
+.image-link {
+    cursor: pointer;
+}
+
+img {
+    max-width: 100%;
+}
+
+@media (max-width: 700px) {
+
+    .image-results-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 450px) {
+
+    .image-results-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
