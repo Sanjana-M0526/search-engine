@@ -2,36 +2,82 @@
 // CONFIGURATION
 // ======================================================
 
-const API_BASE_URL = "https://search-engine-backend-0bba.onrender.com";
+const API_BASE_URL =
+    "https://search-engine-backend-0bba.onrender.com";
 
 // ======================================================
 // ELEMENTS
 // ======================================================
 
-const searchInput = document.getElementById("searchInput");
-const searchButton = document.getElementById("searchButton");
-const resultsContainer = document.getElementById("results");
-const resultsHeader = document.getElementById("resultsHeader");
+const searchInput =
+    document.getElementById("searchInput");
 
-const urlInput = document.getElementById("urlInput");
-const indexButton = document.getElementById("indexButton");
-const indexStatus = document.getElementById("indexStatus");
+const searchButton =
+    document.getElementById("searchButton");
 
-const historyContainer = document.getElementById("history");
-const paginationContainer = document.getElementById("pagination");
+const resultsContainer =
+    document.getElementById("results");
 
-const timeFilter = document.getElementById("timeFilter");
-const filterButtons = document.querySelectorAll(".filter-button");
+const resultsHeader =
+    document.getElementById("resultsHeader");
 
-const suggestionsContainer = document.getElementById("suggestions");
+const urlInput =
+    document.getElementById("urlInput");
+
+const indexButton =
+    document.getElementById("indexButton");
+
+const indexStatus =
+    document.getElementById("indexStatus");
+
+const historyContainer =
+    document.getElementById("history");
+
+const paginationContainer =
+    document.getElementById("pagination");
+
+const timeFilter =
+    document.getElementById("timeFilter");
+
+const filterButtons =
+    document.querySelectorAll(".filter-button");
+
+const suggestionsContainer =
+    document.getElementById("suggestions");
 
 // ======================================================
 // STATE
 // ======================================================
 
-let currentCategory = "all";
+let currentCategory = "general";
 let currentPage = 1;
 let currentQuery = "";
+
+// ======================================================
+// CATEGORY MAPPING
+// ======================================================
+
+function getBackendCategory(category) {
+
+    switch (category) {
+
+        case "news":
+            return "news";
+
+        case "images":
+            return "images";
+
+        case "local":
+            return "local";
+
+        case "general":
+            return "general";
+
+        case "all":
+        default:
+            return "general";
+    }
+}
 
 // ======================================================
 // SEARCH
@@ -39,14 +85,17 @@ let currentQuery = "";
 
 async function performSearch(page = 1) {
 
-    const query = searchInput.value.trim();
+    const query =
+        searchInput.value.trim();
 
     if (!query) {
+
         resultsContainer.innerHTML = `
             <div class="error-message">
                 Please enter something to search.
             </div>
         `;
+
         return;
     }
 
@@ -63,36 +112,66 @@ async function performSearch(page = 1) {
     `;
 
     resultsHeader.innerHTML = "";
+    paginationContainer.innerHTML = "";
 
     try {
 
-        const params = new URLSearchParams();
+        const params =
+            new URLSearchParams();
 
         params.set("q", query);
-        params.set("format", "json");
-        params.set("pageno", page);
-        params.set("category", currentCategory);
 
-        // Add time filter if selected
-        const timeValue = timeFilter.value;
-
-        if (timeValue) {
-            params.set("time", timeValue);
-        }
-
-        const response = await fetch(
-            `${API_BASE_URL}/search?${params.toString()}`
+        params.set(
+            "category",
+            getBackendCategory(currentCategory)
         );
 
-        if (!response.ok) {
-            throw new Error(
-                `Backend returned ${response.status}`
+        params.set(
+            "pageno",
+            page
+        );
+
+        params.set(
+            "format",
+            "json"
+        );
+
+        const timeValue =
+            timeFilter.value;
+
+        if (timeValue) {
+
+            params.set(
+                "time_range",
+                timeValue
             );
         }
 
-        const data = await response.json();
+        const requestURL =
+            `${API_BASE_URL}/search?${params.toString()}`;
 
-        console.log("Search response:", data);
+        console.log(
+            "SEARCH REQUEST:",
+            requestURL
+        );
+
+        const response =
+            await fetch(requestURL);
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Backend returned HTTP ${response.status}`
+            );
+        }
+
+        const data =
+            await response.json();
+
+        console.log(
+            "SEARCH RESPONSE:",
+            data
+        );
 
         displayResults(data);
 
@@ -100,19 +179,31 @@ async function performSearch(page = 1) {
 
     } catch (error) {
 
-        console.error("Search error:", error);
+        console.error(
+            "SEARCH ERROR:",
+            error
+        );
 
         resultsContainer.innerHTML = `
             <div class="error-message">
-                <h3>Search failed</h3>
+
+                <h3>
+                    Search failed
+                </h3>
+
                 <p>
-                    Unable to connect to the search backend.
+                    ${escapeHTML(error.message)}
                 </p>
+
                 <p>
                     Please try again in a few seconds.
                 </p>
+
             </div>
         `;
+
+        resultsHeader.innerHTML = "";
+        paginationContainer.innerHTML = "";
 
     } finally {
 
@@ -127,55 +218,104 @@ async function performSearch(page = 1) {
 
 function displayResults(data) {
 
-    const results = data.results || [];
+    const results =
+        data.results || [];
+
+    const category =
+        data.category ||
+        currentCategory;
+
+    const total =
+        Number(
+            data.total ??
+            results.length
+        );
+
+    resultsHeader.innerHTML = `
+        Found
+        <strong>${total}</strong>
+        result(s) for
+        "<strong>${escapeHTML(
+            data.query ||
+            currentQuery
+        )}</strong>"
+    `;
 
     if (results.length === 0) {
 
         resultsContainer.innerHTML = `
             <div class="empty-message">
-                <h2>No results found</h2>
+
+                <h2>
+                    No results found
+                </h2>
+
                 <p>
                     Try a different search term.
                 </p>
+
             </div>
         `;
-
-        resultsHeader.innerHTML = "";
 
         paginationContainer.innerHTML = "";
 
         return;
     }
 
-    resultsHeader.innerHTML = `
-        Found ${results.length} result(s)
-        for "<strong>${escapeHTML(data.query || currentQuery)}</strong>"
-    `;
+    // ==================================================
+    // IMAGE RESULTS
+    // ==================================================
 
-    resultsContainer.innerHTML = "";
+    if (
+        category === "images" ||
+        currentCategory === "images"
+    ) {
 
-    results.forEach((result, index) => {
+        displayImageResults(results);
 
-        const card = createResultCard(
-            result,
-            index + 1
+    } else {
+
+        // ==================================================
+        // NORMAL RESULTS
+        // ==================================================
+
+        resultsContainer.innerHTML = "";
+
+        results.forEach(
+            (result, index) => {
+
+                const card =
+                    createResultCard(
+                        result,
+                        index + 1
+                    );
+
+                resultsContainer.appendChild(
+                    card
+                );
+            }
         );
-
-        resultsContainer.appendChild(card);
-    });
+    }
 
     createPagination(data);
 }
 
 // ======================================================
-// CREATE RESULT CARD
+// NORMAL RESULT CARD
 // ======================================================
 
-function createResultCard(result, number) {
+function createResultCard(
+    result,
+    number
+) {
 
-    const card = document.createElement("div");
+    const card =
+        document.createElement(
+            "article"
+        );
 
-    card.className = "result-card";
+    card.className =
+        "result-card";
 
     const title =
         result.title ||
@@ -187,6 +327,7 @@ function createResultCard(result, number) {
 
     const content =
         result.content ||
+        result.description ||
         "No description available.";
 
     const engine =
@@ -194,22 +335,31 @@ function createResultCard(result, number) {
         "";
 
     const score =
-        result.score !== undefined
-            ? result.score
-            : "";
+        result.score !== undefined &&
+        result.score !== null &&
+        result.score !== ""
+            ? Number(result.score)
+            : null;
 
-    let domain = "";
+    let domain =
+        result.domain ||
+        "";
 
-    try {
+    if (!domain) {
 
-        domain = new URL(url).hostname;
+        try {
 
-    } catch {
+            domain =
+                new URL(url).hostname;
 
-        domain = url;
+        } catch {
+
+            domain = url;
+        }
     }
 
     card.innerHTML = `
+
         <div class="result-number">
             Result ${number}
         </div>
@@ -235,15 +385,24 @@ function createResultCard(result, number) {
 
             ${
                 engine
-                    ? `<span>Engine: ${escapeHTML(engine)}</span>`
+                    ? `
+                        <span>
+                            Engine:
+                            ${escapeHTML(engine)}
+                        </span>
+                    `
                     : ""
             }
 
             ${
-                score !== ""
-                    ? `<span class="score">
-                        Score: ${escapeHTML(String(score))}
-                       </span>`
+                score !== null &&
+                Number.isFinite(score)
+                    ? `
+                        <span class="score">
+                            Score:
+                            ${score.toFixed(3)}
+                        </span>
+                    `
                     : ""
             }
 
@@ -254,67 +413,201 @@ function createResultCard(result, number) {
 }
 
 // ======================================================
-// PAGINATION
+// IMAGE RESULTS
 // ======================================================
 
-function createPagination(data) {
+function displayImageResults(
+    results
+) {
 
-    paginationContainer.innerHTML = "";
+    const grid =
+        document.createElement(
+            "div"
+        );
 
-    const currentPageNumber =
-        data.page || currentPage;
+    grid.className =
+        "image-grid";
 
-    const total =
-        data.total || 0;
+    let imageCount = 0;
 
-    // If only one page, don't show pagination
-    if (total <= 0) {
+    results.forEach(
+        (result) => {
+
+            const imageURL =
+                result.img_src ||
+                result.thumbnail ||
+                result.image ||
+                "";
+
+            const pageURL =
+                result.url ||
+                imageURL ||
+                "#";
+
+            const title =
+                result.title ||
+                result.content ||
+                "Image result";
+
+            if (!imageURL) {
+                return;
+            }
+
+            imageCount++;
+
+            const card =
+                document.createElement(
+                    "a"
+                );
+
+            card.className =
+                "image-card";
+
+            card.href =
+                pageURL;
+
+            card.target =
+                "_blank";
+
+            card.rel =
+                "noopener noreferrer";
+
+            card.innerHTML = `
+
+                <img
+                    src="${escapeAttribute(
+                        imageURL
+                    )}"
+                    alt="${escapeAttribute(
+                        title
+                    )}"
+                    loading="lazy"
+                    onerror="
+                        this.parentElement.style.display='none';
+                    "
+                >
+
+                <div class="image-card-title">
+                    ${escapeHTML(title)}
+                </div>
+
+            `;
+
+            grid.appendChild(
+                card
+            );
+        }
+    );
+
+    if (imageCount === 0) {
+
+        resultsContainer.innerHTML = `
+            <div class="empty-message">
+
+                <h2>
+                    No image results available
+                </h2>
+
+                <p>
+                    The image search service did not
+                    return usable image URLs.
+                </p>
+
+            </div>
+        `;
+
         return;
     }
 
-    const previousButton =
-        document.createElement("button");
+    resultsContainer.innerHTML = "";
 
-    previousButton.textContent = "← Previous";
+    resultsContainer.appendChild(
+        grid
+    );
+}
 
-    previousButton.disabled =
-        currentPageNumber <= 1;
+// ======================================================
+// PAGINATION
+// ======================================================
 
-    previousButton.onclick = () => {
+function createPagination(
+    data
+) {
 
-        if (currentPageNumber > 1) {
-            performSearch(currentPageNumber - 1);
-        }
-    };
+    paginationContainer.innerHTML =
+        "";
 
-    const pageNumber =
-        document.createElement("span");
-
-    pageNumber.className = "page-number";
-
-    pageNumber.textContent =
-        `Page ${currentPageNumber}`;
-
-    const nextButton =
-        document.createElement("button");
-
-    nextButton.textContent = "Next →";
-
-    /*
-     * We allow next page if the backend returned
-     * a full page of results.
-     */
+    const page =
+        Number(
+            data.page ||
+            currentPage
+        );
 
     const results =
-        data.results || [];
+        data.results ||
+        [];
+
+    const previousButton =
+        document.createElement(
+            "button"
+        );
+
+    previousButton.textContent =
+        "← Previous";
+
+    previousButton.disabled =
+        page <= 1;
+
+    previousButton.onclick =
+        () => {
+
+            if (page > 1) {
+
+                performSearch(
+                    page - 1
+                );
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+            }
+        };
+
+    const pageNumber =
+        document.createElement(
+            "span"
+        );
+
+    pageNumber.className =
+        "page-number";
+
+    pageNumber.textContent =
+        `Page ${page}`;
+
+    const nextButton =
+        document.createElement(
+            "button"
+        );
+
+    nextButton.textContent =
+        "Next →";
 
     nextButton.disabled =
         results.length === 0;
 
-    nextButton.onclick = () => {
+    nextButton.onclick =
+        () => {
 
-        performSearch(currentPageNumber + 1);
-    };
+            performSearch(
+                page + 1
+            );
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        };
 
     paginationContainer.appendChild(
         previousButton
@@ -330,39 +623,64 @@ function createPagination(data) {
 }
 
 // ======================================================
-// FILTER BUTTONS
+// CATEGORY FILTERS
 // ======================================================
 
-filterButtons.forEach(button => {
+filterButtons.forEach(
+    (button) => {
 
-    button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-        filterButtons.forEach(btn => {
-            btn.classList.remove("active");
-        });
+                filterButtons.forEach(
+                    (btn) => {
+                        btn.classList.remove(
+                            "active"
+                        );
+                    }
+                );
 
-        button.classList.add("active");
+                button.classList.add(
+                    "active"
+                );
 
-        currentCategory =
-            button.dataset.category || "all";
+                currentCategory =
+                    button.dataset.category ||
+                    "general";
 
-        // If a search already exists, search again
-        if (currentQuery) {
-            performSearch(1);
-        }
-    });
-});
+                currentPage = 1;
+
+                console.log(
+                    "CATEGORY:",
+                    currentCategory
+                );
+
+                if (currentQuery) {
+
+                    performSearch(1);
+                }
+            }
+        );
+    }
+);
 
 // ======================================================
 // TIME FILTER
 // ======================================================
 
-timeFilter.addEventListener("change", () => {
+timeFilter.addEventListener(
+    "change",
+    () => {
 
-    if (currentQuery) {
-        performSearch(1);
+        currentPage = 1;
+
+        if (currentQuery) {
+
+            performSearch(1);
+        }
     }
-});
+);
 
 // ======================================================
 // SEARCH BUTTON
@@ -370,20 +688,26 @@ timeFilter.addEventListener("change", () => {
 
 searchButton.addEventListener(
     "click",
-    () => performSearch(1)
+    () => {
+        performSearch(1);
+    }
 );
 
 // ======================================================
-// ENTER KEY SEARCH
+// ENTER KEY
 // ======================================================
 
 searchInput.addEventListener(
     "keydown",
-    event => {
+    (event) => {
 
         if (event.key === "Enter") {
 
             event.preventDefault();
+
+            suggestionsContainer.classList.add(
+                "hidden"
+            );
 
             performSearch(1);
         }
@@ -391,7 +715,7 @@ searchInput.addEventListener(
 );
 
 // ======================================================
-// ADD WEBSITE TO INDEX
+// ADD WEBSITE TO MY INDEX
 // ======================================================
 
 indexButton.addEventListener(
@@ -401,7 +725,7 @@ indexButton.addEventListener(
 
 urlInput.addEventListener(
     "keydown",
-    event => {
+    (event) => {
 
         if (event.key === "Enter") {
 
@@ -414,7 +738,8 @@ urlInput.addEventListener(
 
 async function addWebsite() {
 
-    const url = urlInput.value.trim();
+    const url =
+        urlInput.value.trim();
 
     if (!url) {
 
@@ -433,7 +758,7 @@ async function addWebsite() {
     } catch {
 
         showIndexStatus(
-            "Please enter a valid URL.",
+            "Please enter a valid URL, including https://",
             false
         );
 
@@ -441,7 +766,9 @@ async function addWebsite() {
     }
 
     indexButton.disabled = true;
-    indexButton.textContent = "Adding...";
+
+    indexButton.textContent =
+        "Adding...";
 
     showIndexStatus(
         "Adding website to your index...",
@@ -450,28 +777,30 @@ async function addWebsite() {
 
     try {
 
-        /*
-         * Your backend crawler endpoint.
-         */
+        const response =
+            await fetch(
+                `${API_BASE_URL}/index`,
+                {
+                    method: "POST",
 
-        const response = await fetch(
-            `${API_BASE_URL}/index`,
-            {
-                method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    body: JSON.stringify({
+                        url: url
+                    })
+                }
+            );
 
-                body: JSON.stringify({
-                    url: url
-                })
-            }
+        const data =
+            await response.json();
+
+        console.log(
+            "INDEX RESPONSE:",
+            data
         );
-
-        const data = await response.json();
-
-        console.log("Index response:", data);
 
         if (!response.ok) {
 
@@ -492,7 +821,7 @@ async function addWebsite() {
     } catch (error) {
 
         console.error(
-            "Indexing error:",
+            "INDEX ERROR:",
             error
         );
 
@@ -505,7 +834,9 @@ async function addWebsite() {
     } finally {
 
         indexButton.disabled = false;
-        indexButton.textContent = "Add URL";
+
+        indexButton.textContent =
+            "Add URL";
     }
 }
 
@@ -513,9 +844,13 @@ async function addWebsite() {
 // INDEX STATUS
 // ======================================================
 
-function showIndexStatus(message, success) {
+function showIndexStatus(
+    message,
+    success
+) {
 
-    indexStatus.textContent = message;
+    indexStatus.textContent =
+        message;
 
     indexStatus.className =
         success
@@ -527,18 +862,36 @@ function showIndexStatus(message, success) {
 // SEARCH HISTORY
 // ======================================================
 
-function saveSearchHistory(query) {
+function saveSearchHistory(
+    query
+) {
 
-    let history =
-        JSON.parse(
-            localStorage.getItem("searchHistory") ||
-            "[]"
-        );
+    let history = [];
+
+    try {
+
+        history =
+            JSON.parse(
+                localStorage.getItem(
+                    "searchHistory"
+                ) ||
+                "[]"
+            );
+
+    } catch {
+
+        history = [];
+    }
 
     history =
-        history.filter(item => item !== query);
+        history.filter(
+            (item) =>
+                item !== query
+        );
 
-    history.unshift(query);
+    history.unshift(
+        query
+    );
 
     history =
         history.slice(0, 10);
@@ -553,11 +906,22 @@ function saveSearchHistory(query) {
 
 function displaySearchHistory() {
 
-    const history =
-        JSON.parse(
-            localStorage.getItem("searchHistory") ||
-            "[]"
-        );
+    let history = [];
+
+    try {
+
+        history =
+            JSON.parse(
+                localStorage.getItem(
+                    "searchHistory"
+                ) ||
+                "[]"
+            );
+
+    } catch {
+
+        history = [];
+    }
 
     if (history.length === 0) {
 
@@ -570,34 +934,43 @@ function displaySearchHistory() {
         return;
     }
 
-    historyContainer.innerHTML = "";
+    historyContainer.innerHTML =
+        "";
 
-    history.forEach(query => {
+    history.forEach(
+        (query) => {
 
-        const item =
-            document.createElement("div");
+            const item =
+                document.createElement(
+                    "div"
+                );
 
-        item.className =
-            "history-item";
+            item.className =
+                "history-item";
 
-        item.textContent = query;
+            item.textContent =
+                query;
 
-        item.addEventListener(
-            "click",
-            () => {
+            item.addEventListener(
+                "click",
+                () => {
 
-                searchInput.value = query;
+                    searchInput.value =
+                        query;
 
-                performSearch(1);
-            }
-        );
+                    performSearch(1);
+                }
+            );
 
-        historyContainer.appendChild(item);
-    });
+            historyContainer.appendChild(
+                item
+            );
+        }
+    );
 }
 
 // ======================================================
-// SUGGESTIONS
+// SEARCH SUGGESTIONS
 // ======================================================
 
 searchInput.addEventListener(
@@ -617,13 +990,18 @@ searchInput.addEventListener(
         }
 
         suggestionsContainer.innerHTML = `
+
             <div class="suggestion-item">
-                Search for "${escapeHTML(query)}"
+
+                Search for
+                "${escapeHTML(query)}"
+
             </div>
         `;
 
-        suggestionsContainer
-            .classList.remove("hidden");
+        suggestionsContainer.classList.remove(
+            "hidden"
+        );
 
         const suggestion =
             suggestionsContainer.querySelector(
@@ -636,18 +1014,21 @@ searchInput.addEventListener(
 
                 performSearch(1);
 
-                suggestionsContainer
-                    .classList.add("hidden");
+                suggestionsContainer.classList.add(
+                    "hidden"
+                );
             }
         );
     }
 );
 
-// Hide suggestions when clicking elsewhere
+// ======================================================
+// CLOSE SUGGESTIONS
+// ======================================================
 
 document.addEventListener(
     "click",
-    event => {
+    (event) => {
 
         if (
             !event.target.closest(
@@ -655,8 +1036,9 @@ document.addEventListener(
             )
         ) {
 
-            suggestionsContainer
-                .classList.add("hidden");
+            suggestionsContainer.classList.add(
+                "hidden"
+            );
         }
     }
 );
@@ -665,17 +1047,36 @@ document.addEventListener(
 // SECURITY HELPERS
 // ======================================================
 
-function escapeHTML(value) {
+function escapeHTML(
+    value
+) {
 
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
 
-function escapeAttribute(value) {
+function escapeAttribute(
+    value
+) {
 
     return escapeHTML(value);
 }
